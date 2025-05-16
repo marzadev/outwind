@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+  <title>Wind Turbine Power Output Calculator</title>
+  <!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-pNniF4cYIs2bVbL/NxtO4uSRop60qwHPXTG4hPvmjvM=" crossorigin=""/>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1jLKHvZZ5a4EkAHE6E8jWwJYpZOG0bqqTJvT3vFQ=" crossorigin=""></script>
+  <!-- Leaflet CSS & JS for map -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
+<style>
+  :root {
+    --primary-blue: #003366; /* Deep navy blue */
+    --light-blue: #E6F0FA;
+    --white: #ffffff;
+    --gray: #f4f4f4;
+    --text-color: #333;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+
+  font-size: 18px; /* ✅ This is the change */
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+
+  background-color: #e6f0fa;
+  background: linear-gradient(rgba(180, 200, 255, 0.4), rgba(180, 200, 255, 0.4)),
+              url('https://images.unsplash.com/photo-1615209853186-e4bd66602508?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+  .container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 30px 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+  h1, h2, h3 {
+    color: var(--primary-blue);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #222;
+  }
+
+.form-grid > div > label {
+  display: flex;
+  align-items: center;
+  min-height: 38px;  /* Ensures all labels have equal height */
+  gap: 6px;          /* Adds space between label and tooltip icon */
+}
+
+
+
+  input, select {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: var(--white);
+  box-sizing: border-box;
+}
+
+  button {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .output {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: var(--gray);
+    border-left: 5px solid var(--primary-blue);
+    border-radius: 6px;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .dropdown {
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    background-color: var(--white);
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+  }
+
+  .dropdown div:hover {
+    background-color: var(--light-blue);
+  }
+
+  canvas {
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  #map, #vawtMap {
+    border-radius: 8px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  #toggleBetzButton.active,
+#toggleBetzButtonVAWT.active {
+  background-color: #d9534f;
+}
+
+  .output ul li {
+    margin-bottom: 6px;
+  }
+
+/* Gradient Background */
+.selection-background {
+  background: linear-gradient(rgba(230, 242, 255, 0.85), rgba(255, 255, 255, 0.9)),
+              url('https://images.unsplash.com/photo-1615209853186-e4bd66602508?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 80vh;  /* ✅ allow it to expand */
+  height: auto;      /* ✅ override the fixed height */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;  /* ✅ more room around content */
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 20px;
+  margin: 0;
+}
+
+/* Title Styling */
+.selection-title h1 {
+  font-size: 2rem;
+  color: #007BFF;
+  margin-bottom: 10px;
+}
+.selection-title p {
+  font-size: 1.1rem;
+  color: #444;
+  margin-bottom: 30px;
+}
+
+/* Cards Row */
+.turbine-cards {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+/* Individual Card */
+.turbine-card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 25px;
+  width: 280px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.turbine-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.25);
+}
+
+/* Icons */
+.turbine-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 15px;
+}
+
+/* Tooltip */
+.info-tip {
+  display: inline-block;
+  position: relative;
+  font-size: 18px;
+  color: #007BFF;
+  margin-top: 10px;
+  cursor: help;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 220px;
+  background-color: #004080;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -110px;
+  opacity: 0;
+  transition: opacity 0.3s;
+ font-weight: normal;
+
+}
+
+.info-tip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.small-chart canvas {
+  width: 100% !important;
+  max-width: 390px !important;
+  height: auto !important;
+  max-height: 260px !important;
+}
+
+input[type="range"] {
+  width: 95%;
+  max-width: 95%;
+  margin-top: 10px;
+}
+
+.turbine-card {
+  position: relative; /* Make it a positioning context */
+}
+
+.info-wrapper {
+  position: absolute;
+  bottom: 20px; /* default bottom position for HAWT */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.vawt-info-offset {
+  bottom: 25px !important; /* move it 10px lower for VAWT only */
+}
+
+
+@media (max-width: 600px) {
+
+.form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body {
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .selection-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .selection-title p {
+    font-size: 1rem;
+  }
+
+  .turbine-card {
+    width: 90%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .small-chart canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  button {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  label {
+    font-size: 16px;
+  }
+
+  input, select {
+    width: 100% !important;
+  }
+}
+
+
+
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+</style>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+
+  <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+  <img src="https://i.postimg.cc/0N9XmWQ2/cropped-image-2.png" alt="Logo" style="height: 90px;" />
+  <h1 style="font-size: 2.5rem; margin: 0;">OutWind</h1>
+</div> 
+
+
+    
+    <!-- Enhanced Selection Screen -->
+  <div id="selectionScreen" class="selection-background">
+    <div class="selection-title">
+      <h1 style="color: var(--primary-blue);">Welcome to the Wind Turbine Calculator</h1>
+      <p>Select the type of wind turbine to get started:</p>
+    </div>
+    <div class="turbine-cards">
+      <!-- HAWT Card -->
+      <div class="turbine-card" onclick="selectTurbineType('HAWT')">
+  <h2>Horizontal Axis Turbine (HAWT)</h2>
+  <img src="https://i.postimg.cc/fTYzfkjX/Screenshot-2025-05-11-184100.png" alt="HAWT Image" style="width: 100%; height: auto; margin: 12px 0; border-radius: 8px;" />
+  <p>Most common turbine type. Blades rotate perpendicular to wind direction.</p>
+  <span class="info-tip">ℹ️  <span class="tooltip-text">Efficient for strong, consistent wind — e.g., offshore or open fields.</span></span>
+</div>
+  
+      <!-- VAWT Card -->
+     <div class="turbine-card" onclick="selectTurbineType('VAWT')">
+  <h2>Vertical Axis Turbine (VAWT)</h2>
+  <img src="https://i.postimg.cc/d10jcLjS/Screenshot-2025-05-11-183818.png" alt="VAWT Image" style="width: 100%; height: auto; margin: 12px 0; border-radius: 8px;" />
+  <p>Rotates around vertical axis. Good for turbulent or urban wind flows.</p>
+  <div class="info-wrapper vawt-info-offset">
+  <span class="info-tip">ℹ️ 
+    <span class="tooltip-text">
+      Better for rooftop or dense environments where wind shifts direction.
+    </span>
+  </span>
+</div>
+</div>
+    </div>
+  </div>
+
+
+  <!-- HAWT Form -->
+  <div id="hawtForm" class="hidden">
+    <form id="calculatorForm">
+      <!-- MAP FOR SELECTING LOCATION -->
+<div style="margin: 30px 0;">
+  <label style="display: block; margin-bottom: 12px; font-weight: bold;">
+    Select Location on Map to Autofill Environmental Data:
+  </label>
+  <div id="map" style="height: 300px; width: 100%; border: 1px solid #ccc; border-radius: 6px;"></div>
+</div>
+      <!-- Blade Material -->
+      <label for="bladeMaterial">Blade Material:</label>
+      <select id="bladeMaterial" required>
+        <option value="85">Glass Fiber Reinforced Plastic (GFRP)</option>
+        <option value="95">Carbon Fiber Reinforced Plastic (CFRP)</option>
+        <option value="90">Epoxy Resin Composites</option>
+        <option value="80">Polyester Resin Composites</option>
+        <option value="75">Balsa Wood (Core Material)</option>
+        <option value="70">Polyurethane Foam (Core Material)</option>
+        <option value="85">Aluminum Alloys</option>
+        <option value="80">Steel Alloys</option>
+        <option value="90">Titanium Alloys</option>
+        <option value="88">Kevlar Reinforced Plastic</option>
+        <option value="70">High-Density Polyethylene (HDPE)</option>
+        <option value="82">Thermoplastic Composites</option>
+        <option value="75">Wood-Laminated Composites</option>
+        <option value="60">Acrylic Glass (PMMA)</option>
+        <option value="65">Polycarbonate (PC)</option>
+        <option value="70">Natural Fiber Composites (Hemp, Flax)</option>
+        <option value="85">Glass-Epoxy Composites</option>
+        <option value="95">Carbon-Epoxy Composites</option>
+        <option value="83">Steel with Anti-Corrosive Coating</option>
+        <option value="87">Aluminum with Anti-Corrosive Coating</option>
+        <option value="85">Nickel Alloys</option>
+        <option value="78">Magnesium Alloys</option>
+        <option value="92">Hybrid Composites (Glass/Carbon Fiber)</option>
+        <option value="75">Phenolic Resin Composites</option>
+        <option value="95">Epoxy with Nanomaterials</option>
+        <option value="90">Ceramic Composites</option>
+        <option value="90">Glass-Titanium Composites</option>
+        <option value="88">Aramid Fiber Composites</option>
+        <option value="80">Stainless Steel Alloys</option>
+        <option value="65">Recycled Composite Materials</option>
+      </select>
+
+      <!-- Blade Coating -->
+      <label for="bladeCoating">Blade Coating:</label>
+      <select id="bladeCoating" required>
+        <option value="90">Anti-Corrosion Paint (Epoxy-Based)</option>
+        <option value="85">UV-Resistant Coating</option>
+        <option value="88">Hydrophobic Coating (Water-Repellent)</option>
+        <option value="92">Ice-Phobic Coating (Anti-Icing)</option>
+        <option value="87">Anti-Erosion Coating (Polyurethane)</option>
+        <option value="95">Self-Cleaning Coating (Nanotechnology)</option>
+        <option value="90">Anti-Fouling Coating (Marine Applications)</option>
+        <option value="85">Ceramic Coating</option>
+        <option value="93">Fluoropolymer Coating (Low Friction)</option>
+        <option value="80">Elastomeric Coating (Flexible)</option>
+        <option value="82">Thermal Barrier Coating</option>
+        <option value="95">Graphene Coating (Superhydrophobic)</option>
+        <option value="88">Abrasion-Resistant Coating</option>
+        <option value="85">Weather-Resistant Coating</option>
+        <option value="80">Anti-Reflective Coating (Solar Protection)</option>
+        <option value="83">Rust Inhibitor Coating</option>
+        <option value="90">Nano-Ceramic Coating</option>
+        <option value="85">PTFE (Teflon) Coating</option>
+        <option value="87">High-Gloss UV Protection Coating</option>
+        <option value="88">Zinc-Rich Primer (Anti-Corrosion)</option>
+        <option value="85">Electrostatic Powder Coating</option>
+        <option value="75">Water-Based Acrylic Coating</option>
+        <option value="80">Polyurethane Topcoat</option>
+        <option value="90">Epoxy Primer with Polyurethane Topcoat</option>
+        <option value="95">Nanocomposite Coating (Anti-Wear)</option>
+        <option value="82">Silicone-Based Coating</option>
+        <option value="75">Organic Coating (Eco-Friendly)</option>
+        <option value="70">Clear Anti-Graffiti Coating</option>
+        <option value="85">High-Temperature Resistant Coating</option>
+        <option value="88">Metallic Coating (Aluminum or Zinc)</option>
+      </select>
+
+      <!-- Energy Storage -->
+      <label for="energyStorage">Energy Storage Method:</label>
+      <select id="energyStorage" required>
+        <option value="0.92">Lithium-Ion Batteries - Efficiency: 92%</option>
+        <option value="0.85">Sodium-Sulfur Batteries - Efficiency: 85%</option>
+        <option value="0.78">Flow Batteries (Vanadium Redox) - Efficiency: 78%</option>
+        <option value="0.75">Lead-Acid Batteries - Efficiency: 75%</option>
+        <option value="0.92">Solid-State Batteries - Efficiency: 92%</option>
+        <option value="0.75">Pumped Hydro Storage - Efficiency: 75%</option>
+        <option value="0.55">Compressed Air Energy Storage (CAES) - Efficiency: 55%</option>
+        <option value="0.87">Flywheel Energy Storage - Efficiency: 87%</option>
+        <option value="0.95">Supercapacitors (Ultracapacitors) - Efficiency: 95%</option>
+        <option value="0.85">Thermal Energy Storage (Molten Salt) - Efficiency: 85%</option>
+        <option value="0.75">Thermal Energy Storage (Ice) - Efficiency: 75%</option>
+        <option value="0.47">Hydrogen Storage (Compressed) - Efficiency: 47%</option>
+        <option value="0.43">Hydrogen Storage (Liquefied) - Efficiency: 43%</option>
+        <option value="0.90">Flywheel Energy Storage (Magnetic Bearings) - Efficiency: 90%</option>
+        <option value="0.70">Zinc-Air Batteries - Efficiency: 70%</option>
+        <option value="0.95">Superconducting Magnetic Energy Storage (SMES) - Efficiency: 95%</option>
+        <option value="0.35">Biochemical Energy Storage (Biofuels) - Efficiency: 35%</option>
+        <option value="0.50">Ammonia Energy Storage - Efficiency: 50%</option>
+        <option value="0.83">Gravitational Energy Storage - Efficiency: 83%</option>
+        <option value="0.47">Compressed Hydrogen Storage - Efficiency: 47%</option>
+        <option value="0.50">Biogas Storage - Efficiency: 50%</option>
+        <option value="0.80">Wind Energy Storage (Using Wind Farms) - Efficiency: 80%</option>
+        <option value="0.90">Battery Energy Storage Systems (BESS) - Efficiency: 90%</option>
+        <option value="0.90">Flywheel (High-Speed, Carbon Fiber) - Efficiency: 90%</option>
+        <option value="0.78">Pump-Storage Hydroelectric - Efficiency: 78%</option>
+        <option value="0.85">Thermal Energy Storage (Phase Change Materials) - Efficiency: 85%</option>
+        <option value="0.87">Thermal Energy Storage (Molten Salt) - Efficiency: 87%</option>
+        <option value="0.65">Mechanical Energy Storage (Elastic Springs) - Efficiency: 65%</option>
+        <option value="0.87">Magnetic Energy Storage - Efficiency: 87%</option>
+        <option value="0.85">Heat Pump Thermal Energy Storage - Efficiency: 85%</option>
+      </select>
+
+<!-- Wind Farm Toggle -->
+<label>Is this turbine part of a wind farm?</label>
+<div style="margin-bottom: 15px;">
+  <button type="button" onclick="setWindFarmMode(true)">Yes</button>
+  <button type="button" onclick="setWindFarmMode(false)">No</button>
+</div>
+
+<!-- Wind Farm Settings -->
+<div id="hawtFarmSettings" class="hidden" style="margin-bottom: 15px;">
+  <label>Enter Wind Farm Grid Dimensions:</label>
+  <input type="number" id="hawtRows" placeholder="Rows (e.g. 3)" min="1" />
+  <input type="number" id="hawtCols" placeholder="Columns (e.g. 3)" min="1" />
+  <button type="button" onclick="generateHAWTGrid()">Generate Grid</button>
+</div>
+<!-- HAWT Wind Farm Grid Display -->
+<div id="hawtFarmGridContainer" class="output hidden" style="margin-bottom: 25px;">
+  <div style="display: flex; gap: 40px; align-items: flex-start;">
+    <!-- Grid Section -->
+    <div>
+      <h3>Wind Farm Layout</h3>
+      <div id="hawtFarmGrid" style="display: grid; gap: 5px; margin-top: 10px;"></div>
+      <p>Total Active Turbines: <strong id="hawtTurbineCount">0</strong></p>
+    </div>
+
+    <!-- Legend Section -->
+    <div style="margin-top: 35px;">
+      <h4 style="margin-bottom: 10px;">Legend</h4>
+      <div style="display: flex; align-items: center; margin-bottom: 8px;">
+        <div style="width: 20px; height: 20px; background-color: #e8f5e9; border: 1px solid #ccc; margin-right: 8px;"></div>
+        <span>Not affected by wake</span>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <div style="width: 20px; height: 20px; background-color: #ffdddd; border: 1px solid #ccc; margin-right: 8px;"></div>
+        <span>Affected by wake</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HAWT Wind Farm Output Summary -->
+<div id="hawtFarmOutputSummary" class="output hidden">
+  <h3>Wind Farm Output Summary</h3>
+  <p>Total Active Turbines: <strong id="hawtFarmTotalTurbines">0</strong></p>
+  <p>Ideal Output (No Wake Loss): <strong id="hawtFarmIdeal">0</strong> W</p>
+  <p>Actual Output (With Wake Loss): <strong id="hawtFarmActual">0</strong> W</p>
+  <p>Total Wake Loss: <strong id="hawtFarmLoss">0</strong> W (<span id="hawtFarmLossPercent">0</span>%)</p>
+</div>
+
+<!-- HAWT Wind Farm Charts -->
+<div id="hawtFarmCharts" class="output hidden">
+  <div style="display: flex; justify-content: space-evenly; flex-wrap: wrap; gap: 20px;">
+    <div class="small-chart">
+      <h3>Power Distribution</h3>
+      <canvas id="hawtFarmBarChart"></canvas>
+    </div>
+    <div class="small-chart">
+      <h3>Ideal vs Actual Output</h3>
+      <canvas id="hawtFarmPieChart"></canvas>
+    </div>
+  </div>
+</div>
+<div style="margin-bottom: 35px;">
+  <button type="button" onclick="calculateHAWTWindFarmOutput()">Calculate Wind Farm Output</button>
+
+
+</div>
+<!-- ADD THIS SPACER -->
+<div style="height: 2px;"></div>
+
+    
+      <!-- Inputs -->
+      <div class="form-grid">
+        <div>
+          <label for="bladeLength">Length of Blade (m):</label>
+          <input type="number" id="bladeLength" required />
+        </div>
+        <div>
+          <label for="turbineHeight">Turbine Height (m):</label>
+          <input type="number" id="turbineHeight" required />
+        </div>
+        <div>
+          <label for="windSpeed">Wind Speed (m/s)(3–25)
+  <span class="info-tip">ℹ️
+    <span class="tooltip-text">
+      Most wind turbines operate between a <strong>cut-in speed</strong> of 3 m/s (the minimum speed required to generate power) and a <strong>cut-out speed</strong> of 25 m/s (maximum speed before shutdown to prevent damage).
+    </span>
+  </span>
+</label>
+<input type="number" id="windSpeed" min="3" max="25" required />
+        </div>
+        <div>
+          <label for="airDensity">
+  Air Density (kg/m³)
+  <span class="info-tip">ℹ️
+    <span class="tooltip-text">
+      ρ = p / (R·T)<br>
+      ρ: air density (kg/m³)<br>
+      p: pressure (Pa)<br>
+      R: specific gas constant (287 J/kg·K)<br>
+      T: temperature (K)
+    </span>
+  </span>
+</label>
+          <input type="number" id="airDensity" required />
+        </div>
+        <div>
+          <label for="turbineEfficiency">Turbine Efficiency (%):</label>
+          <input type="number" id="turbineEfficiency" required />
+        </div>
+        <div>
+          <label for="generatorEfficiency">Generator Efficiency (%):</label>
+          <input type="number" id="generatorEfficiency" required />
+        </div>
+        <div>
+          <label for="airTemperature">Air Temperature (°C):</label>
+          <input type="number" id="airTemperature" required />
+        </div>
+        <div>
+          <label for="humidity">Humidity (%):</label>
+          <input type="number" id="humidity" required />
+        </div>
+
+<div>
+  <label for="hawtUnavailability">
+    Unavailability (%)
+    <span class="info-tip">ℹ️
+      <span class="tooltip-text">
+        What percentage of the time the turbine is unavailable due to failures, malfunctioning, servicing?
+      </span>
+    </span>
+  </label>
+  <input type="number" id="hawtUnavailability" min="0" max="100" placeholder="e.g. 4" />
+</div>
+
+      </div>
+      <button type="button" onclick="calculateHAWTOutput()">Calculate Power Output</button>
+    </form>
+
+    <div class="output" id="hawtResult">
+      <h3>Calculated Power Output (HAWT):</h3>
+      <p id="powerOutput">N/A</p>
+    </div>
+    <div class="output">
+      <h3>Wind Direction Selector (for HAWT)</h3>
+      <canvas id="windCompass" width="350" height="350" style="border:1px solid #ccc; background-color:#f9f9f9;"></canvas>
+      <p>Wind is currently coming from: <strong id="windDirectionLabel">0° (North)</strong></p>
+    </div>
+    <div class="output">
+      <p><strong>Betz Limit Explanation:</strong> The Betz Limit is the maximum theoretical efficiency for a wind turbine. It states that no turbine can capture more than <strong>59.3%</strong> of the kinetic energy in the wind.</p>
+      <button id="toggleBetzButton" onclick="toggleBetzLimit()">Apply Betz Limit</button>
+    </div>
+
+<!-- HAWT Loss Breakdown -->
+<div id="hawtLossBreakdown" class="output hidden">
+  <h3>Power Loss Breakdown (HAWT)</h3>
+  <div id="hawtLossWrapper" style="display: flex; justify-content: center; align-items: center; max-width: 100%; margin-top: 20px;">
+  <canvas id="hawtLossChart" style="width: 450px; height: 450px;"></canvas>
+</div>
+</div>
+
+<!-- HAWT Tab Switcher -->
+<div class="output">
+  <button onclick="showHAWTTab('output')">Power Output</button>
+  <button onclick="showHAWTTab('financial')">Financials</button>
+  <button onclick="showHAWTTab('impact')">Environmental Impact</button>
+    <a href="https://en.wind-turbine-models.com/" target="_blank" style="text-decoration: none;">
+    <button type="button" style="margin-top: 10px;">Turbine Models</button>
+  </a>
+</div>
+<!-- HAWT Financial Tab -->
+<div id="hawtFinancialTab" class="output hidden">
+  <label for="hawtCountrySearch">Select Country (2025 Rates):</label>
+  <input type="text" id="hawtCountrySearch" placeholder="Type country name...">
+  <div id="hawtCountryDropdown" class="dropdown"></div>
+
+  <p><strong>Selected Country:</strong> <span id="hawtSelectedCountry">None</span></p>
+  <p><strong>Price per kWh:</strong> $<span id="hawtPricePerKwh">0.00</span></p>
+
+  <label for="hawtTimeSlider">Select Time Period (Days): <span id="hawtTimeDays">30</span></label>
+  <input type="range" id="hawtTimeSlider" min="1" max="365" value="30">
+  
+  <h3>Estimated Revenue</h3>
+  <p><strong>$<span id="hawtRevenue">0.00</span></strong></p>
+
+<!-- Turbine Model Comparison Table (HAWT Financial Tab) -->
+<div id="hawtModelTableContainer" class="hidden" style="margin-top: 30px;">
+  <h3>Top 50 Wind Turbine Models</h3>
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 16px;">
+      <thead>
+        <tr style="background-color: #003366; color: white;">
+          <th style="padding: 10px; border: 1px solid #ccc;">Rank</th>
+          <th style="padding: 10px; border: 1px solid #ccc;">Model</th>
+          <th style="padding: 10px; border: 1px solid #ccc;">Manufacturer</th>
+          <th style="padding: 10px; border: 1px solid #ccc;">Type</th>
+          <th style="padding: 10px; border: 1px solid #ccc;">Rated Capacity (MW)</th>
+          <th style="padding: 10px; border: 1px solid #ccc;">Total Cost</th>
+          <th style="padding: 10px; border: 1px solid #ccc;">Maintenance Cost / Year</th>
+        </tr>
+      </thead>
+      <tbody id="hawtModelTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+<!-- HAWT Environmental Impact Tab -->
+<div id="hawtEnvironmentalImpactTab" class="output hidden">
+  <h3>Environmental Impact</h3>
+  <p><strong>Total Energy Output:</strong> <span id="hawtTotalEnergy">0</span> kWh</p>
+  <ul>
+    <li>🛢️ Equivalent to <strong><span id="hawtOil">0</span></strong> barrels of crude oil</li>
+    <li>⛽ Equivalent to <strong><span id="hawtGasoline">0</span></strong> gallons of gasoline</li>
+    <li>🪨 Equivalent to <strong><span id="hawtCoal">0</span></strong> pounds of coal</li>
+    <li>🔥 Equivalent to <strong><span id="hawtGas">0</span></strong> cubic meters of natural gas</li>
+    <li>🌍 CO₂ emissions avoided: <strong><span id="hawtCO2">0</span></strong> kg</li>
+  </ul>
+</div>
+
+
+   <!-- Graph Container and Slider for HAWT -->
+<div id="hawtGraphContainer" class="output hidden">
+    <label for="hawtWindSpeedSlider">Adjust Wind Speed (m/s): <span id="hawtWindSpeedValue">10</span></label>
+    <input type="range" id="hawtWindSpeedSlider" min="3" max="25" value="10">
+    <canvas id="hawtPowerGraph"></canvas>
+  </div> 
+  </div>
+
+    <!-- VAWT Form (Insert below HAWT Form) -->
+    <div id="vawtForm" class="hidden">
+        <form id="vawtCalculatorForm">
+          <!-- MAP FOR SELECTING LOCATION (VAWT) -->
+<div style="margin: 30px 0 0px 0;">
+  <label style="display: block; margin-bottom: 15px; font-weight: bold; font-size: 18px;">
+    Select Location on Map to Autofill Environmental Data:
+  </label>
+  <div id="vawtMap" style="height: 300px; width: 100%; border: 1px solid #ccc; border-radius: 6px;"></div>
+</div>
+          <p><strong>Vertical Axis Wind Turbines (VAWTs)</strong> rotate around a vertical axis and are ideal for areas with variable wind directions.</p>
+          <ul>
+            <li><strong>Savonius:</strong> Drag-based, good for low-speed wind, lower efficiency (Cp ≈ 0.2)</li>
+            <li><strong>Darrieus:</strong> Lift-based, better efficiency (Cp ≈ 0.35), needs wind to start</li>
+          </ul>
+  
+          <label for="vawtType">Select VAWT Type:</label>
+          <select id="vawtType" required>
+            <option value="0.2">Savonius (Drag-based)</option>
+            <option value="0.35">Darrieus (Lift-based)</option>
+          </select>
+  
+          <label for="vawtBladeMaterial">Blade Material:</label>
+          <select id="vawtBladeMaterial" required>
+            <option value="85">Glass Fiber Reinforced Plastic (GFRP)</option>
+            <option value="95">Carbon Fiber Reinforced Plastic (CFRP)</option>
+            <option value="90">Epoxy Resin Composites</option>
+            <option value="80">Polyester Resin Composites</option>
+            <option value="75">Balsa Wood (Core Material)</option>
+            <option value="70">Polyurethane Foam (Core Material)</option>
+            <option value="85">Aluminum Alloys</option>
+            <option value="80">Steel Alloys</option>
+            <option value="90">Titanium Alloys</option>
+            <option value="88">Kevlar Reinforced Plastic</option>
+            <option value="70">High-Density Polyethylene (HDPE)</option>
+            <option value="82">Thermoplastic Composites</option>
+            <option value="75">Wood-Laminated Composites</option>
+            <option value="60">Acrylic Glass (PMMA)</option>
+            <option value="65">Polycarbonate (PC)</option>
+            <option value="70">Natural Fiber Composites (Hemp, Flax)</option>
+            <option value="85">Glass-Epoxy Composites</option>
+            <option value="95">Carbon-Epoxy Composites</option>
+            <option value="83">Steel with Anti-Corrosive Coating</option>
+            <option value="87">Aluminum with Anti-Corrosive Coating</option>
+            <option value="85">Nickel Alloys</option>
+            <option value="78">Magnesium Alloys</option>
+            <option value="92">Hybrid Composites (Glass/Carbon Fiber)</option>
+            <option value="75">Phenolic Resin Composites</option>
+            <option value="95">Epoxy with Nanomaterials</option>
+            <option value="90">Ceramic Composites</option>
+            <option value="90">Glass-Titanium Composites</option>
+            <option value="88">Aramid Fiber Composites</option>
+            <option value="80">Stainless Steel Alloys</option>
+            <option value="65">Recycled Composite Materials</option>
+          </select>
+  
+          <label for="vawtBladeCoating">Blade Coating:</label>
+          <select id="vawtBladeCoating" required>
+            <option value="90">Anti-Corrosion Paint (Epoxy-Based)</option>
+            <option value="85">UV-Resistant Coating</option>
+            <option value="88">Hydrophobic Coating (Water-Repellent)</option>
+            <option value="92">Ice-Phobic Coating (Anti-Icing)</option>
+            <option value="87">Anti-Erosion Coating (Polyurethane)</option>
+            <option value="95">Self-Cleaning Coating (Nanotechnology)</option>
+            <option value="90">Anti-Fouling Coating (Marine Applications)</option>
+            <option value="85">Ceramic Coating</option>
+            <option value="93">Fluoropolymer Coating (Low Friction)</option>
+            <option value="80">Elastomeric Coating (Flexible)</option>
+            <option value="82">Thermal Barrier Coating</option>
+            <option value="95">Graphene Coating (Superhydrophobic)</option>
+            <option value="88">Abrasion-Resistant Coating</option>
+            <option value="85">Weather-Resistant Coating</option>
+            <option value="80">Anti-Reflective Coating (Solar Protection)</option>
+            <option value="83">Rust Inhibitor Coating</option>
+            <option value="90">Nano-Ceramic Coating</option>
+            <option value="85">PTFE (Teflon) Coating</option>
+            <option value="87">High-Gloss UV Protection Coating</option>
+            <option value="88">Zinc-Rich Primer (Anti-Corrosion)</option>
+            <option value="85">Electrostatic Powder Coating</option>
+            <option value="75">Water-Based Acrylic Coating</option>
+            <option value="80">Polyurethane Topcoat</option>
+            <option value="90">Epoxy Primer with Polyurethane Topcoat</option>
+            <option value="95">Nanocomposite Coating (Anti-Wear)</option>
+            <option value="82">Silicone-Based Coating</option>
+            <option value="75">Organic Coating (Eco-Friendly)</option>
+            <option value="70">Clear Anti-Graffiti Coating</option>
+            <option value="85">High-Temperature Resistant Coating</option>
+            <option value="88">Metallic Coating (Aluminum or Zinc)</option>
+          </select>
+  
+          <label for="vawtEnergyStorage">Energy Storage Method:</label>
+          <select id="vawtEnergyStorage" required>
+            <option value="0.92">Lithium-Ion Batteries - Efficiency: 92%</option>
+            <option value="0.85">Sodium-Sulfur Batteries - Efficiency: 85%</option>
+            <option value="0.78">Flow Batteries (Vanadium Redox) - Efficiency: 78%</option>
+            <option value="0.75">Lead-Acid Batteries - Efficiency: 75%</option>
+            <option value="0.92">Solid-State Batteries - Efficiency: 92%</option>
+            <option value="0.75">Pumped Hydro Storage - Efficiency: 75%</option>
+            <option value="0.55">Compressed Air Energy Storage (CAES) - Efficiency: 55%</option>
+            <option value="0.87">Flywheel Energy Storage - Efficiency: 87%</option>
+            <option value="0.95">Supercapacitors (Ultracapacitors) - Efficiency: 95%</option>
+            <option value="0.85">Thermal Energy Storage (Molten Salt) - Efficiency: 85%</option>
+            <option value="0.75">Thermal Energy Storage (Ice) - Efficiency: 75%</option>
+            <option value="0.47">Hydrogen Storage (Compressed) - Efficiency: 47%</option>
+            <option value="0.43">Hydrogen Storage (Liquefied) - Efficiency: 43%</option>
+            <option value="0.90">Flywheel Energy Storage (Magnetic Bearings) - Efficiency: 90%</option>
+            <option value="0.70">Zinc-Air Batteries - Efficiency: 70%</option>
+            <option value="0.95">Superconducting Magnetic Energy Storage (SMES) - Efficiency: 95%</option>
+            <option value="0.35">Biochemical Energy Storage (Biofuels) - Efficiency: 35%</option>
+            <option value="0.50">Ammonia Energy Storage - Efficiency: 50%</option>
+            <option value="0.83">Gravitational Energy Storage - Efficiency: 83%</option>
+            <option value="0.47">Compressed Hydrogen Storage - Efficiency: 47%</option>
+            <option value="0.50">Biogas Storage - Efficiency: 50%</option>
+            <option value="0.80">Wind Energy Storage (Using Wind Farms) - Efficiency: 80%</option>
+            <option value="0.90">Battery Energy Storage Systems (BESS) - Efficiency: 90%</option>
+            <option value="0.90">Flywheel (High-Speed, Carbon Fiber) - Efficiency: 90%</option>
+            <option value="0.78">Pump-Storage Hydroelectric - Efficiency: 78%</option>
+            <option value="0.85">Thermal Energy Storage (Phase Change Materials) - Efficiency: 85%</option>
+            <option value="0.87">Thermal Energy Storage (Molten Salt) - Efficiency: 87%</option>
+            <option value="0.65">Mechanical Energy Storage (Elastic Springs) - Efficiency: 65%</option>
+            <option value="0.87">Magnetic Energy Storage - Efficiency: 87%</option>
+            <option value="0.85">Heat Pump Thermal Energy Storage - Efficiency: 85%</option>
+          </select>
+  
+<!-- Wind Farm Toggle -->
+<label>Is this turbine part of a wind farm?</label>
+<div style="margin-bottom: 15px;">
+  <button type="button" onclick="setVAWTWindFarmMode(true)">Yes</button>
+  <button type="button" onclick="setVAWTWindFarmMode(false)">No</button>
+</div>
+
+<!-- Wind Farm Settings -->
+<div id="vawtFarmSettings" class="hidden" style="margin-bottom: 15px;">
+  <label>Enter Wind Farm Grid Dimensions:</label>
+  <input type="number" id="vawtRows" placeholder="Rows (e.g. 3)" min="1" />
+  <input type="number" id="vawtCols" placeholder="Columns (e.g. 3)" min="1" />
+  <button type="button" onclick="generateVAWTGrid()">Generate Grid</button>
+</div>
+
+<!-- VAWT Wind Farm Grid Display -->
+<div id="vawtFarmGridContainer" class="output hidden" style="margin-bottom: 25px;">
+  <div style="display: flex; gap: 40px; align-items: flex-start;">
+    <!-- Grid Section -->
+    <div>
+      <h3>Wind Farm Layout</h3>
+      <div id="vawtFarmGrid" style="display: grid; gap: 5px; margin-top: 10px;"></div>
+      <p>Total Active Turbines: <strong id="vawtTurbineCount">0</strong></p>
+    </div>
+
+    <!-- Legend Section -->
+    <div style="margin-top: 35px;">
+      <h4 style="margin-bottom: 10px;">Legend</h4>
+      <div style="display: flex; align-items: center; margin-bottom: 8px;">
+        <div style="width: 20px; height: 20px; background-color: #e8f5e9; border: 1px solid #ccc; margin-right: 8px;"></div>
+        <span>Not affected by wake</span>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <div style="width: 20px; height: 20px; background-color: #ffdddd; border: 1px solid #ccc; margin-right: 8px;"></div>
+        <span>Affected by wake</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VAWT Wind Farm Output Summary -->
+<div id="vawtFarmOutputSummary" class="output hidden">
+  <h3>Wind Farm Output Summary</h3>
+  <p>Total Active Turbines: <strong id="vawtFarmTotalTurbines">0</strong></p>
+  <p>Ideal Output (No Wake Loss): <strong id="vawtFarmIdeal">0</strong> W</p>
+  <p>Actual Output (With Wake Loss): <strong id="vawtFarmActual">0</strong> W</p>
+  <p>Total Wake Loss: <strong id="vawtFarmLoss">0</strong> W (<span id="vawtFarmLossPercent">0</span>%)</p>
+</div>
+
+<!-- VAWT Wind Farm Charts -->
+<div id="vawtFarmCharts" class="output hidden">
+  <div style="display: flex; justify-content: space-evenly; flex-wrap: wrap; gap: 20px;">
+    <div class="small-chart">
+      <h3>Power Distribution</h3>
+      <canvas id="vawtFarmBarChart"></canvas>
+    </div>
+    <div class="small-chart">
+      <h3>Ideal vs Actual Output</h3>
+      <canvas id="vawtFarmPieChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Trigger Button -->
+<div style="margin-bottom: 45px;">
+  <button type="button" onclick="calculateVAWTWindFarmOutput()">Calculate Wind Farm Output</button>
+</div>
+
+        
+<div class="form-grid">
+  <div>
+    <label for="rotorDiameter">Rotor Diameter (m):</label>
+    <input type="number" id="rotorDiameter" required />
+  </div>
+  <div>
+    <label for="vawtHeight">Turbine Height (m):</label>
+    <input type="number" id="vawtHeight" required />
+  </div>
+  <div>
+    <label for="vawtWindSpeed">Wind Speed (m/s) (3–25)
+  <span class="info-tip">ℹ️
+    <span class="tooltip-text">
+      Most wind turbines operate between a <strong>cut-in speed</strong> of 3 m/s (the minimum speed required to generate power) and a <strong>cut-out speed</strong> of 25 m/s (maximum speed before shutdown to prevent damage).
+    </span>
+  </span>
+</label>
+    <input type="number" id="vawtWindSpeed" required />
+  </div>
+  <div>
+    <label for="vawtAirDensity">Air Density (kg/m³):</label>
+    <input type="number" id="vawtAirDensity" required />
+  </div>
+  <div>
+    <label for="vawtTurbineEfficiency">Turbine Efficiency (%):</label>
+    <input type="number" id="vawtTurbineEfficiency" required />
+  </div>
+  <div>
+    <label for="vawtGeneratorEfficiency">Generator Efficiency (%):</label>
+    <input type="number" id="vawtGeneratorEfficiency" required />
+  </div>
+  <div>
+    <label for="vawtAirTemperature">Air Temperature (°C):</label>
+    <input type="number" id="vawtAirTemperature" required />
+  </div>
+  <div>
+    <label for="vawtHumidity">Humidity (%):</label>
+    <input type="number" id="vawtHumidity" required />
+  </div>
+
+<div>
+  <label for="vawtUnavailability">
+    Unavailability (%)
+    <span class="info-tip">ℹ️
+      <span class="tooltip-text">
+        What percentage of the time the turbine is unavailable due to failures, malfunctioning, servicing?
+      </span>
+    </span>
+  </label>
+  <input type="number" id="vawtUnavailability" min="0" max="100" placeholder="e.g. 4" />
+</div>
+
+</div>
+  
+          <button type="button" onclick="calculateVAWTOutput()">Calculate Power Output</button>
+        </form>
+  
+        <div class="output" id="vawtResult">
+          <h3>Calculated Power Output (VAWT):</h3>
+          <p id="vawtPowerOutput">N/A</p>
+        </div>
+
+<div class="output">
+  <p><strong>Betz Limit Explanation:</strong> The Betz Limit is the maximum theoretical efficiency for a wind turbine. It states that no turbine can capture more than <strong>59.3%</strong> of the kinetic energy in the wind.</p>
+  <button id="toggleBetzButtonVAWT" onclick="toggleBetzLimitVAWT()">Apply Betz Limit</button>
+</div>
+
+         <!-- VAWT Loss Breakdown -->
+<div id="vawtLossBreakdown" class="output hidden">
+  <h3>Power Loss Breakdown (VAWT)</h3>
+ <div id="vawtLossWrapper" style="display: flex; justify-content: center; align-items: center; max-width: 100%; margin-top: 20px;">
+  <canvas id="vawtLossChart" style="width: 450px; height: 450px;"></canvas>
+</div>
+</div>
+        
+<!-- VAWT Tab Switcher -->
+<div class="output">
+  <button onclick="showVAWTTab('output')">Power Output</button>
+  <button onclick="showVAWTTab('financial')">Financials</button>
+  <button onclick="showVAWTTab('impact')">Environmental Impact</button>
+  <a href="https://en.wind-turbine-models.com/" target="_blank" style="text-decoration: none;">
+    <button type="button" style="margin-top: 10px;">Turbine Models</button>
+  </a>
+</div>
+<!-- VAWT Environmental Impact Tab -->
+<div id="vawtEnvironmentalImpactTab" class="output hidden">
+  <h3>Environmental Impact</h3>
+  <p><strong>Total Energy Output:</strong> <span id="vawtTotalEnergy">0</span> kWh</p>
+  <ul>
+    <li>🛢️ Equivalent to <strong><span id="vawtOil">0</span></strong> barrels of crude oil</li>
+    <li>⛽ Equivalent to <strong><span id="vawtGasoline">0</span></strong> gallons of gasoline</li>
+    <li>🪨 Equivalent to <strong><span id="vawtCoal">0</span></strong> pounds of coal</li>
+    <li>🔥 Equivalent to <strong><span id="vawtGas">0</span></strong> cubic meters of natural gas</li>
+    <li>🌍 CO₂ emissions avoided: <strong><span id="vawtCO2">0</span></strong> kg</li>
+  </ul>
+</div>
+<!-- VAWT Financial Tab -->
+<div id="vawtFinancialTab" class="output hidden">
+ 
+  <label for="vawtCountrySearch">Select Country (2025 Rates):</label>
+  <input type="text" id="vawtCountrySearch" placeholder="Type country name...">
+  <div id="vawtCountryDropdown" class="dropdown"></div>
+
+  <p><strong>Selected Country:</strong> <span id="vawtSelectedCountry">None</span></p>
+  <p><strong>Price per kWh:</strong> $<span id="vawtPricePerKwh">0.00</span></p>
+
+  <label for="vawtTimeSlider">Select Time Period (Days): <span id="vawtTimeDays">30</span></label>
+  <input type="range" id="vawtTimeSlider" min="1" max="365" value="30">
+  
+  <h3>Estimated Revenue</h3>
+  <p><strong>$<span id="vawtRevenue">0.00</span></strong></p>
+</div>
+        <div id="vawtGraphContainer" class="output hidden">
+            <label for="vawtWindSpeedSlider">Adjust Wind Speed (m/s): <span id="vawtWindSpeedValue">10</span></label>
+            <input type="range" id="vawtWindSpeedSlider" min="3" max="25" value="10">
+
+            <canvas id="vawtPowerGraph"></canvas>
+          </div>
+      </div>
+    </div>
+  
+    <script>
+function selectTurbineType(type) {
+  document.getElementById('selectionScreen').classList.add('hidden');
+
+  if (type === 'HAWT') {
+    document.getElementById('hawtForm').classList.remove('hidden');
+    document.getElementById('vawtForm').classList.add('hidden');
+
+    setTimeout(() => {
+      if (map) map.invalidateSize();
+    }, 200);
+
+  } else {
+    document.getElementById('vawtForm').classList.remove('hidden');
+    document.getElementById('hawtForm').classList.add('hidden');
+
+    setTimeout(() => {
+      if (vawtMap) vawtMap.invalidateSize();
+    }, 200);
+  }
+
+  setTimeout(setupWeatherMap, 100);
+}
+  
+      function calculateVAWTOutput() {
+  const requiredVAWTInputs = ['rotorDiameter', 'vawtHeight', 'vawtWindSpeed', 'vawtAirDensity', 'vawtTurbineEfficiency', 'vawtGeneratorEfficiency', 'vawtAirTemperature', 'vawtHumidity'];
+const allVAWTValid = requiredVAWTInputs.every(id => document.getElementById(id).value.trim() !== '');
+
+if (!allVAWTValid) {
+  alert("Please fill in all required VAWT input fields.");
+  return;
+}
+
+const windSpeedInput = parseFloat(document.getElementById('vawtWindSpeed').value);
+const power = calculateVAWTPowerAtSpeed(windSpeedInput);
+showVAWTLossBreakdown(windSpeedInput);
+
+  document.getElementById('vawtPowerOutput').innerText = power.toFixed(2) + ' Watts';
+
+  document.getElementById('vawtGraphContainer').classList.remove('hidden');
+
+  const data = generateChartData(calculateVAWTPowerAtSpeed);
+  if (vawtChart) vawtChart.destroy();
+  vawtChart = createGraph(document.getElementById('vawtPowerGraph'), data);
+
+  const slider = document.getElementById('vawtWindSpeedSlider');
+  const sliderValue = document.getElementById('vawtWindSpeedValue');
+  slider.value = windSpeedInput;
+  sliderValue.innerText = windSpeedInput;
+
+  slider.oninput = () => {
+    sliderValue.innerText = slider.value;
+    const updatedPower = calculateVAWTPowerAtSpeed(parseFloat(slider.value));
+    document.getElementById('vawtPowerOutput').innerText = updatedPower.toFixed(2) + ' Watts';
+  };
+}
+function calculateHAWTOutput() {
+  hasCalculatedHAWT = true; // ✅ Add this line at the top to track that "Calculate" was clicked
+  const requiredHAWTInputs = ['bladeLength', 'turbineHeight', 'windSpeed', 'airDensity', 'turbineEfficiency', 'generatorEfficiency', 'airTemperature', 'humidity'];
+const allHAWTValid = requiredHAWTInputs.every(id => document.getElementById(id).value.trim() !== '');
+
+if (!allHAWTValid) {
+  alert("Please fill in all required HAWT input fields.");
+  return;
+}
+
+const windSpeedInput = parseFloat(document.getElementById('windSpeed').value);
+const power = calculateHAWTPowerAtSpeed(windSpeedInput);
+showHAWTLossBreakdown(windSpeedInput);
+
+  document.getElementById('powerOutput').innerText = power.toFixed(2) + ' Watts';
+
+  document.getElementById('hawtGraphContainer').classList.remove('hidden');
+
+  const data = generateChartData(calculateHAWTPowerAtSpeed);
+  if (hawtChart) hawtChart.destroy();
+  hawtChart = createGraph(document.getElementById('hawtPowerGraph'), data);
+
+  const slider = document.getElementById('hawtWindSpeedSlider');
+  const sliderValue = document.getElementById('hawtWindSpeedValue');
+  slider.value = windSpeedInput;
+  sliderValue.innerText = windSpeedInput;
+
+  slider.oninput = () => {
+    sliderValue.innerText = slider.value;
+    const updatedPower = calculateHAWTPowerAtSpeed(parseFloat(slider.value));
+    document.getElementById('powerOutput').innerText = updatedPower.toFixed(2) + ' Watts';
+  };
+}
+ // Chart instances
+let hawtChart, vawtChart;
+
+let applyBetz = false;
+function toggleBetzLimit() {
+  applyBetz = !applyBetz;
+  const button = document.getElementById('toggleBetzButton');
+  button.innerText = applyBetz ? "Remove Betz Limit" : "Apply Betz Limit";
+  button.classList.toggle("active", applyBetz);
+  calculateHAWTOutput();
+  updateRevenue("hawt");
+  updateHAWTEnvironmentalImpact();
+}
+let applyBetzVAWT = false;
+function toggleBetzLimitVAWT() {
+  applyBetzVAWT = !applyBetzVAWT;
+  const button = document.getElementById('toggleBetzButtonVAWT');
+  button.innerText = applyBetzVAWT ? "Remove Betz Limit" : "Apply Betz Limit";
+  button.classList.toggle("active", applyBetzVAWT);
+  calculateVAWTOutput();
+  updateRevenue("vawt");
+  updateVAWTEnvironmentalImpact();
+}
+
+
+let selectedWindAngle = 0; // Default: wind from North (0°)
+
+let hasCalculatedHAWT = false; // Tracks if user pressed Calculate
+
+
+function drawCompass(angle) {
+  const canvas = document.getElementById("windCompass");
+  const ctx = canvas.getContext("2d");
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const radius = 100;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Outer circle
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+  ctx.strokeStyle = "#666";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Degree ticks and labels
+  for (let deg = 0; deg < 360; deg += 30) {
+    const rotatedDeg = deg - 90; // Rotate so 0° is at North
+    const rad = rotatedDeg * (Math.PI / 180);
+    const x1 = centerX + radius * Math.cos(rad);
+    const y1 = centerY + radius * Math.sin(rad);
+    const x2 = centerX + (radius - 10) * Math.cos(rad);
+    const y2 = centerY + (radius - 10) * Math.sin(rad);
+
+    // Tick line
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Label
+    const labelX = centerX + (radius - 20) * Math.cos(rad);
+    const labelY = centerY + (radius - 20) * Math.sin(rad);
+    ctx.font = "12px Arial";
+    ctx.fillStyle = "#000";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`${deg}°`, labelX, labelY);
+  }
+
+  // Cardinal directions
+  ctx.font = "16px Arial";
+  ctx.fillText("N", centerX, centerY - radius - 15);
+  ctx.fillText("E", centerX + radius + 15, centerY);
+  ctx.fillText("S", centerX, centerY + radius + 15);
+  ctx.fillText("W", centerX - radius - 15, centerY);
+
+  // Draw turbine (fixed facing North)
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY);
+  ctx.lineTo(centerX, centerY - 80);
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Wind direction arrow
+  const arrowRad = (angle - 90) * (Math.PI / 180); // 0° at top
+  const arrowX = centerX + radius * Math.cos(arrowRad);
+  const arrowY = centerY + radius * Math.sin(arrowRad);
+
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY);
+  ctx.lineTo(arrowX, arrowY);
+  ctx.strokeStyle = "red";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function setupWindCompass() {
+  const canvas = document.getElementById("windCompass");
+  const label = document.getElementById("windDirectionLabel");
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  let isDragging = false;
+
+  function updateAngle(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left - centerX;
+    const y = e.clientY - rect.top - centerY;
+    const angleRad = Math.atan2(y, x);
+    selectedWindAngle = (angleRad * 180 / Math.PI + 450) % 360;
+    label.innerText = `${selectedWindAngle.toFixed(0)}°`;
+    drawCompass(selectedWindAngle);
+    if (hasCalculatedHAWT) {
+  calculateHAWTOutput();
+}
+  }
+
+  canvas.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    updateAngle(e);
+  });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (isDragging) updateAngle(e);
+  });
+
+  canvas.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    isDragging = false;
+  });
+
+  drawCompass(selectedWindAngle);
+}
+
+// Helper function to calculate HAWT power output for a given wind speed
+function calculateHAWTPowerAtSpeed(speed) {
+  if (speed < 3 || speed > 25) return 0;
+
+  const bladeLength = parseFloat(document.getElementById('bladeLength').value);
+  const airTemp = parseFloat(document.getElementById('airTemperature').value);
+  const airDensity = parseFloat(document.getElementById('airDensity').value);
+  const humidity = parseFloat(document.getElementById('humidity').value);
+  const turbineEfficiency = parseFloat(document.getElementById('turbineEfficiency').value) / 100;
+  const generatorEfficiency = parseFloat(document.getElementById('generatorEfficiency').value) / 100;
+  const bladeMaterialEfficiency = parseFloat(document.getElementById('bladeMaterial').value) / 100;
+  const bladeCoatingEfficiency = parseFloat(document.getElementById('bladeCoating').value) / 100;
+  const energyStorageEfficiency = parseFloat(document.getElementById('energyStorage').value);
+
+  const sweptArea = Math.PI * Math.pow(bladeLength, 2);
+  const adjustedAirDensity = airDensity;
+
+  const windPower = 0.5 * adjustedAirDensity * sweptArea * Math.pow(speed, 3);
+
+  let powerOutput = windPower * bladeMaterialEfficiency * bladeCoatingEfficiency * turbineEfficiency * generatorEfficiency * energyStorageEfficiency;
+
+// Directional efficiency: drop smoothly from 0° to 90°, 0 beyond 90°
+const angleDifference = Math.min(
+  Math.abs(selectedWindAngle - 0),
+  360 - Math.abs(selectedWindAngle - 0)
+);
+const clampedAngle = Math.min(angleDifference, 90); // clamp to 0–90°
+const directionEfficiency = Math.cos(clampedAngle * Math.PI / 180);
+powerOutput *= directionEfficiency;
+
+if (applyBetz) {
+  powerOutput *= 0.593;
+}
+return powerOutput;
+}
+
+function showHAWTLossBreakdown(speed) {
+  const bladeLength = parseFloat(document.getElementById('bladeLength').value);
+  const airTemp = parseFloat(document.getElementById('airTemperature').value);
+  const humidity = parseFloat(document.getElementById('humidity').value);
+  const turbineEfficiency = parseFloat(document.getElementById('turbineEfficiency').value) / 100;
+  const generatorEfficiency = parseFloat(document.getElementById('generatorEfficiency').value) / 100;
+  const bladeMaterialEfficiency = parseFloat(document.getElementById('bladeMaterial').value) / 100;
+  const bladeCoatingEfficiency = parseFloat(document.getElementById('bladeCoating').value) / 100;
+  const energyStorageEfficiency = parseFloat(document.getElementById('energyStorage').value);
+
+  const sweptArea = Math.PI * Math.pow(bladeLength, 2);
+  const airDensityCorrection = 1.225 * Math.max(0.8, (1 - 0.00367 * airTemp));
+  const humidityCorrection = Math.max(0.7, 1 - (humidity / 100));
+  const adjustedAirDensity = airDensityCorrection * humidityCorrection;
+
+  const windPower = 0.5 * adjustedAirDensity * sweptArea * Math.pow(speed, 3);
+
+  // Stepwise power drops
+  const afterBlade = windPower * bladeMaterialEfficiency * bladeCoatingEfficiency;
+  const afterTurbine = afterBlade * turbineEfficiency;
+  const afterGenerator = afterTurbine * generatorEfficiency;
+  const afterStorage = afterGenerator * energyStorageEfficiency;
+
+  // Directional loss
+  const angleDifference = Math.min(Math.abs(selectedWindAngle - 0), 360 - Math.abs(selectedWindAngle - 0));
+  const clampedAngle = Math.min(angleDifference, 90);
+  const directionEfficiency = Math.cos(clampedAngle * Math.PI / 180);
+  const finalPower = afterStorage * directionEfficiency;
+
+  // Individual losses
+  const bladeLoss = windPower - afterBlade;
+  const turbineLoss = afterBlade - afterTurbine;
+  const generatorLoss = afterTurbine - afterGenerator;
+  const storageLoss = afterGenerator - afterStorage;
+  const directionLoss = afterStorage - finalPower;
+
+  const lossChartCanvas = document.getElementById("hawtLossChart");
+  if (window.hawtLossChartInstance) {
+    window.hawtLossChartInstance.destroy();
+  }
+
+  window.hawtLossChartInstance = new Chart(lossChartCanvas, {
+    type: 'pie',
+    data: {
+      labels: ['Blade Loss', 'Turbine Loss', 'Generator Loss', 'Storage Loss', 'Direction Loss'],
+      datasets: [{
+        data: [bladeLoss, turbineLoss, generatorLoss, storageLoss, directionLoss],
+        backgroundColor: ['#FF6384', '#FFCE56', '#36A2EB', '#4BC0C0', '#9966FF']
+      }]
+    },
+    options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'right',
+      labels: {
+        boxWidth: 12,
+        padding: 15
+      }
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          const value = context.raw;
+          const total = context.chart._metasets[0].total;
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${context.label}: ${value.toFixed(2)} W (${percentage}%)`;
+        }
+      }
+    }
+  }
+}
+  });
+
+  document.getElementById("hawtLossBreakdown").classList.remove("hidden");
+}
+
+// Helper function to calculate VAWT power output for a given wind speed
+function calculateVAWTPowerAtSpeed(speed) {
+  if (speed < 3 || speed > 25) return 0;
+
+  const diameter = parseFloat(document.getElementById('rotorDiameter').value);
+  const height = parseFloat(document.getElementById('vawtHeight').value);
+  const airTemp = parseFloat(document.getElementById('vawtAirTemperature').value);
+  const airDensity = parseFloat(document.getElementById('vawtAirDensity').value);
+  const humidity = parseFloat(document.getElementById('vawtHumidity').value);
+  const bladeMaterialEfficiency = parseFloat(document.getElementById('vawtBladeMaterial').value) / 100;
+  const bladeCoatingEfficiency = parseFloat(document.getElementById('vawtBladeCoating').value) / 100;
+  const energyStorageEfficiency = parseFloat(document.getElementById('vawtEnergyStorage').value);
+  const turbineEfficiency = parseFloat(document.getElementById('vawtTurbineEfficiency').value) / 100;
+  const generatorEfficiency = parseFloat(document.getElementById('vawtGeneratorEfficiency').value) / 100;
+
+  const sweptArea = diameter * height;
+  const adjustedAirDensity = airDensity;
+
+  const windPower = 0.5 * adjustedAirDensity * sweptArea * Math.pow(speed, 3);
+
+   let powerOutput = windPower * bladeMaterialEfficiency * bladeCoatingEfficiency * turbineEfficiency * generatorEfficiency * energyStorageEfficiency;
+
+  if (applyBetzVAWT) {
+    powerOutput *= 0.593;
+  }
+
+  return powerOutput;
+}
+
+
+function showVAWTLossBreakdown(speed) {
+  const diameter = parseFloat(document.getElementById('rotorDiameter').value);
+  const height = parseFloat(document.getElementById('vawtHeight').value);
+  const airTemp = parseFloat(document.getElementById('vawtAirTemperature').value);
+  const humidity = parseFloat(document.getElementById('vawtHumidity').value);
+  const bladeMaterialEfficiency = parseFloat(document.getElementById('vawtBladeMaterial').value) / 100;
+  const bladeCoatingEfficiency = parseFloat(document.getElementById('vawtBladeCoating').value) / 100;
+  const energyStorageEfficiency = parseFloat(document.getElementById('vawtEnergyStorage').value);
+  const turbineEfficiency = parseFloat(document.getElementById('vawtTurbineEfficiency').value) / 100;
+  const generatorEfficiency = parseFloat(document.getElementById('vawtGeneratorEfficiency').value) / 100;
+
+  const sweptArea = diameter * height;
+  const airDensityCorrection = 1.225 * Math.max(0.8, (1 - 0.00367 * airTemp));
+  const humidityCorrection = Math.max(0.7, 1 - (humidity / 100));
+  const adjustedAirDensity = airDensityCorrection * humidityCorrection;
+
+  const windPower = 0.5 * adjustedAirDensity * sweptArea * Math.pow(speed, 3);
+
+  // Step-by-step power reductions
+  const afterBlade = windPower * bladeMaterialEfficiency * bladeCoatingEfficiency;
+  const afterTurbine = afterBlade * turbineEfficiency;
+  const afterGenerator = afterTurbine * generatorEfficiency;
+  const afterStorage = afterGenerator * energyStorageEfficiency;
+
+  const finalPower = afterStorage; // No directional loss for VAWT
+
+  // Calculate losses
+  const bladeLoss = windPower - afterBlade;
+  const turbineLoss = afterBlade - afterTurbine;
+  const generatorLoss = afterTurbine - afterGenerator;
+  const storageLoss = afterGenerator - afterStorage;
+
+  const vawtChartCanvas = document.getElementById("vawtLossChart");
+  if (window.vawtLossChartInstance) {
+    window.vawtLossChartInstance.destroy();
+  }
+
+  window.vawtLossChartInstance = new Chart(vawtChartCanvas, {
+    type: 'pie',
+    data: {
+      labels: ['Blade Loss', 'Turbine Loss', 'Generator Loss', 'Storage Loss'],
+      datasets: [{
+        data: [bladeLoss, turbineLoss, generatorLoss, storageLoss],
+        backgroundColor: ['#FF6384', '#FFCE56', '#36A2EB', '#4BC0C0']
+      }]
+    },
+    options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'right',
+      labels: {
+        boxWidth: 12,
+        padding: 15
+      }
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          const value = context.raw;
+          const total = context.chart._metasets[0].total;
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${context.label}: ${value.toFixed(2)} W (${percentage}%)`;
+        }
+      }
+    }
+  }
+}
+  });
+
+  document.getElementById("vawtLossBreakdown").classList.remove("hidden");
+}
+// Generate chart data
+function generateChartData(calcFunction) {
+  const speeds = [];
+  const outputs = [];
+  for (let speed = 1; speed <= 50; speed++) {
+    speeds.push(speed);
+    outputs.push(calcFunction(speed).toFixed(2));
+  }
+  return { speeds, outputs };
+}
+
+// Create Chart.js Graph
+function createGraph(context, data) {
+  return new Chart(context, {
+    type: 'line',
+    data: {
+      labels: data.speeds,
+      datasets: [{
+        label: 'Power Output (Watts)',
+        data: data.outputs,
+        borderColor: 'blue',
+        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true },
+        x: { title: { display: true, text: 'Wind Speed (m/s)' } }
+      }
+    }
+  });
+} 
+
+// 2025 Electricity Prices per kWh by Country (USD) with Flags
+const countryData = [
+  { name: "Italy", flag: "🇮🇹", price: 0.46 },
+  { name: "Ireland", flag: "🇮🇪", price: 0.44 },
+  { name: "Cayman Islands", flag: "🇰🇾", price: 0.43 },
+  { name: "Liechtenstein", flag: "🇱🇮", price: 0.41 },
+  { name: "Switzerland", flag: "🇨🇭", price: 0.40 },
+  { name: "Denmark", flag: "🇩🇰", price: 0.38 },
+  { name: "Barbados", flag: "🇧🇧", price: 0.37 },
+  { name: "United Kingdom", flag: "🇬🇧", price: 0.37 },
+  { name: "Germany", flag: "🇩🇪", price: 0.36 },
+  { name: "Belgium", flag: "🇧🇪", price: 0.36 },
+  { name: "Austria", flag: "🇦🇹", price: 0.36 },
+  { name: "Czech Republic", flag: "🇨🇿", price: 0.36 },
+  { name: "Bahamas", flag: "🇧🇸", price: 0.35 },
+  { name: "Cape Verde", flag: "🇨🇻", price: 0.32 },
+  { name: "France", flag: "🇫🇷", price: 0.32 },
+  { name: "Cyprus", flag: "🇨🇾", price: 0.31 },
+  { name: "Guatemala", flag: "🇬🇹", price: 0.30 },
+  { name: "Jamaica", flag: "🇯🇲", price: 0.29 },
+  { name: "Estonia", flag: "🇪🇪", price: 0.29 },
+  { name: "Australia", flag: "🇦🇺", price: 0.27 },
+  { name: "Lithuania", flag: "🇱🇹", price: 0.27 },
+  { name: "Netherlands", flag: "🇳🇱", price: 0.27 },
+  { name: "Kenya", flag: "🇰🇪", price: 0.26 },
+  { name: "Latvia", flag: "🇱🇻", price: 0.26 },
+  { name: "Singapore", flag: "🇸🇬", price: 0.25 },
+  { name: "Sierra Leone", flag: "🇸🇱", price: 0.25 },
+  { name: "Uruguay", flag: "🇺🇾", price: 0.24 },
+  { name: "Slovenia", flag: "🇸🇮", price: 0.24 },
+  { name: "Poland", flag: "🇵🇱", price: 0.24 },
+  { name: "Portugal", flag: "🇵🇹", price: 0.24 },
+  { name: "Luxembourg", flag: "🇱🇺", price: 0.23 },
+  { name: "Honduras", flag: "🇭🇳", price: 0.23 },
+  { name: "Spain", flag: "🇪🇸", price: 0.23 },
+  { name: "Sweden", flag: "🇸🇪", price: 0.22 },
+  { name: "El Salvador", flag: "🇸🇻", price: 0.22 },
+  { name: "Mali", flag: "🇲🇱", price: 0.22 },
+  { name: "Greece", flag: "🇬🇷", price: 0.22 },
+  { name: "Japan", flag: "🇯🇵", price: 0.22 },
+  { name: "New Zealand", flag: "🇳🇿", price: 0.22 },
+  { name: "Belize", flag: "🇧🇿", price: 0.22 },
+  { name: "Slovakia", flag: "🇸🇰", price: 0.21 },
+  { name: "Aruba", flag: "🇦🇼", price: 0.21 },
+  { name: "Colombia", flag: "🇨🇴", price: 0.21 },
+  { name: "Gabon", flag: "🇬🇦", price: 0.21 },
+  { name: "Philippines", flag: "🇵🇭", price: 0.20 },
+  { name: "Togo", flag: "🇹🇬", price: 0.20 },
+  { name: "Rwanda", flag: "🇷🇼", price: 0.19 },
+  { name: "South Africa", flag: "🇿🇦", price: 0.19 },
+  { name: "Peru", flag: "🇵🇪", price: 0.19 },
+  { name: "Senegal", flag: "🇸🇳", price: 0.19 },
+  { name: "Finland", flag: "🇫🇮", price: 0.19 },
+  { name: "United States", flag: "🇺🇸", price: 0.18 },
+  { name: "Sri Lanka", flag: "🇱🇰", price: 0.18 },
+  { name: "Hong Kong", flag: "🇭🇰", price: 0.18 },
+  { name: "Panama", flag: "🇵🇦", price: 0.18 },
+  { name: "Romania", flag: "🇷🇴", price: 0.18 },
+  { name: "Nicaragua", flag: "🇳🇮", price: 0.18 },
+  { name: "Costa Rica", flag: "🇨🇷", price: 0.17 },
+  { name: "Chile", flag: "🇨🇱", price: 0.17 },
+  { name: "Uganda", flag: "🇺🇬", price: 0.17 },
+  { name: "Israel", flag: "🇮🇱", price: 0.17 },
+  { name: "Norway", flag: "🇳🇴", price: 0.17 },
+  { name: "Iceland", flag: "🇮🇸", price: 0.17 },
+  { name: "Croatia", flag: "🇭🇷", price: 0.17 },
+  { name: "Macau", flag: "🇲🇴", price: 0.16 },
+  { name: "Brazil", flag: "🇧🇷", price: 0.15 },
+  { name: "Cambodia", flag: "🇰🇭", price: 0.15 },
+  { name: "Namibia", flag: "🇳🇦", price: 0.15 },
+  { name: "Malta", flag: "🇲🇹", price: 0.15 },
+  { name: "Bulgaria", flag: "🇧🇬", price: 0.15 },
+  { name: "Moldova", flag: "🇲🇩", price: 0.14 },
+  { name: "Lebanon", flag: "🇱🇧", price: 0.14 },
+  { name: "Serbia", flag: "🇷🇸", price: 0.14 },
+  { name: "Mauritius", flag: "🇲🇺", price: 0.13 },
+  { name: "Thailand", flag: "🇹🇭", price: 0.13 },
+  { name: "South Korea", flag: "🇰🇷", price: 0.13 },
+  { name: "North Macedonia", flag: "🇲🇰", price: 0.13 },
+  { name: "Albania", flag: "🇦🇱", price: 0.13 },
+  { name: "Madagascar", flag: "🇲🇬", price: 0.13 },
+  { name: "Mozambique", flag: "🇲🇿", price: 0.13 },
+  { name: "Canada", flag: "🇨🇦", price: 0.13 },
+  { name: "Eswatini", flag: "🇸🇿", price: 0.12 },
+  { name: "Morocco", flag: "🇲🇦", price: 0.12 },
+  { name: "Dominican Republic", flag: "🇩🇴", price: 0.11 },
+  { name: "Armenia", flag: "🇦🇲", price: 0.11 },
+  { name: "Hungary", flag: "🇭🇺", price: 0.11 },
+  { name: "Ghana", flag: "🇬🇭", price: 0.11 },
+  { name: "Lesotho", flag: "🇱🇸", price: 0.11 },
+  { name: "Mexico", flag: "🇲🇽", price: 0.10 },
+  { name: "Bosnia and Herzegovina", flag: "🇧🇦", price: 0.10 },
+  { name: "Ecuador", flag: "🇪🇨", price: 0.10 },
+  { name: "Botswana", flag: "🇧🇼", price: 0.10 },
+  { name: "Maldives", flag: "🇲🇻", price: 0.10 },
+  { name: "Indonesia", flag: "🇮🇩", price: 0.10 },
+  { name: "Taiwan", flag: "🇹🇼", price: 0.09 },
+  { name: "Jordan", flag: "🇯🇴", price: 0.09 },
+  { name: "Cameroon", flag: "🇨🇲", price: 0.09 },
+  { name: "Tanzania", flag: "🇹🇿", price: 0.08 },
+  { name: "United Arab Emirates", flag: "🇦🇪", price: 0.08 },
+  { name: "China", flag: "🇨🇳", price: 0.08 },
+  { name: "India", flag: "🇮🇳", price: 0.08 },
+  { name: "Vietnam", flag: "🇻🇳", price: 0.08 },
+  { name: "Belarus", flag: "🇧🇾", price: 0.07 },
+  { name: "Pakistan", flag: "🇵🇰", price: 0.07 },
+  { name: "Tunisia", flag: "🇹🇳", price: 0.07 },
+  { name: "Suriname", flag: "🇸🇷", price: 0.07 },
+  { name: "Malawi", flag: "🇲🇼", price: 0.07 },
+  { name: "Ukraine", flag: "🇺🇦", price: 0.06 },
+  { name: "Georgia", flag: "🇬🇪", price: 0.06 },
+  { name: "Russia", flag: "🇷🇺", price: 0.06 },
+  { name: "DR Congo", flag: "🇨🇩", price: 0.06 },
+  { name: "Afghanistan", flag: "🇦🇫", price: 0.06 },
+  { name: "Bangladesh", flag: "🇧🇩", price: 0.05 },
+  { name: "Malaysia", flag: "🇲🇾", price: 0.05 },
+  { name: "Saudi Arabia", flag: "🇸🇦", price: 0.05 },
+  { name: "Paraguay", flag: "🇵🇾", price: 0.05 },
+  { name: "Trinidad and Tobago", flag: "🇹🇹", price: 0.05 },
+  { name: "Kazakhstan", flag: "🇰🇿", price: 0.05 },
+  { name: "Turkey", flag: "🇹🇷", price: 0.05 },
+  { name: "Bahrain", flag: "🇧🇭", price: 0.05 },
+  { name: "Azerbaijan", flag: "🇦🇿", price: 0.05 },
+  { name: "Venezuela", flag: "🇻🇪", price: 0.05 },
+  { name: "Nepal", flag: "🇳🇵", price: 0.04 },
+  { name: "Algeria", flag: "🇩🇿", price: 0.04 },
+  { name: "Qatar", flag: "🇶🇦", price: 0.03 },
+  { name: "Kuwait", flag: "🇰🇼", price: 0.03 },
+  { name: "Laos", flag: "🇱🇦", price: 0.03 },
+  { name: "Oman", flag: "🇴🇲", price: 0.03 },
+  { name: "Uzbekistan", flag: "🇺🇿", price: 0.02 },
+  { name: "Zambia", flag: "🇿🇲", price: 0.02 },
+  { name: "Argentina", flag: "🇦🇷", price: 0.02 },
+  { name: "Egypt", flag: "🇪🇬", price: 0.02 },
+  { name: "Iraq", flag: "🇮🇶", price: 0.01 },
+  { name: "Bhutan", flag: "🇧🇹", price: 0.01 },
+  { name: "Nigeria", flag: "🇳🇬", price: 0.01 },
+  { name: "Angola", flag: "🇦🇴", price: 0.01 },
+  { name: "Kyrgyzstan", flag: "🇰🇬", price: 0.01 },
+  { name: "Libya", flag: "🇱🇾", price: 0.01 },
+  { name: "Sudan", flag: "🇸🇩", price: 0.01 },
+  { name: "Syria", flag: "🇸🇾", price: 0.01 },
+  { name: "Cuba", flag: "🇨🇺", price: 0.01 },
+  { name: "Ethiopia", flag: "🇪🇹", price: 0.00 },
+  { name: "Iran", flag: "🇮🇷", price: 0.00 }
+];
+
+function setupFinancialTabs() {
+  setupSearch("hawt");
+  setupSearch("vawt");
+
+  document.getElementById("hawtTimeSlider").oninput = () => {
+    document.getElementById("hawtTimeDays").innerText = event.target.value;
+    updateRevenue("hawt");
+  };
+  document.getElementById("vawtTimeSlider").oninput = () => {
+    document.getElementById("vawtTimeDays").innerText = event.target.value;
+    updateRevenue("vawt");
+  };
+}
+
+function setupSearch(type) {
+  const input = document.getElementById(`${type}CountrySearch`);
+  const dropdown = document.getElementById(`${type}CountryDropdown`);
+  const selectedSpan = document.getElementById(`${type}SelectedCountry`);
+  const priceSpan = document.getElementById(`${type}PricePerKwh`);
+
+  input.addEventListener("input", () => {
+    const query = input.value.toLowerCase();
+    dropdown.innerHTML = "";
+    if (!query) return;
+
+    const matches = countryData.filter(c => c.name.toLowerCase().includes(query));
+    matches.forEach(country => {
+      const div = document.createElement("div");
+      div.textContent = `${country.flag} ${country.name}`;
+      div.style.cursor = "pointer";
+      div.style.padding = "5px";
+      div.onclick = () => {
+        input.value = "";
+        dropdown.innerHTML = "";
+        selectedSpan.textContent = `${country.flag} ${country.name}`;
+        priceSpan.textContent = country.price.toFixed(2);
+        input.dataset.price = country.price;
+        updateRevenue(type);
+      };
+      dropdown.appendChild(div);
+    });
+  });
+}
+
+function updateRevenue(type) {
+  const unavailability = parseFloat(document.getElementById(`${type}Unavailability`).value || 0);
+
+  if (unavailability < 0 || unavailability > 100) {
+    alert("Unavailability must be between 0 and 100.");
+    return;
+  }
+
+  const price = parseFloat(document.getElementById(`${type}CountrySearch`).dataset.price || 0);
+  const days = parseInt(document.getElementById(`${type}TimeSlider`).value || 0);
+  const power =
+    type === "hawt"
+      ? calculateHAWTPowerAtSpeed(parseFloat(document.getElementById("windSpeed").value || 0))
+      : calculateVAWTPowerAtSpeed(parseFloat(document.getElementById("vawtWindSpeed").value || 0));
+  const kwh = (power * 24 * days) / 1000;
+  const adjustedRevenue = kwh * price * (1 - unavailability / 100);
+  document.getElementById(`${type}Revenue`).textContent = adjustedRevenue.toFixed(2);
+}
+function updateHAWTEnvironmentalImpact() {
+  const days = parseInt(document.getElementById("hawtTimeSlider").value || 0);
+  const powerW = parseFloat(document.getElementById("powerOutput").innerText) || 0;
+  const kWh = (powerW * 24 * days) / 1000;
+
+  // Update energy output
+  document.getElementById("hawtTotalEnergy").innerText = kWh.toFixed(2);
+
+  // Conversion factors
+  const barrelKWh = 1700;
+  const gasolineKWh = 33.7;
+  const coalKWh = 2.5;
+  const gasKWh = 10.5;
+  const co2PerKWh = 0.5;
+
+  // Calculate equivalents
+  document.getElementById("hawtOil").innerText = (kWh / barrelKWh).toFixed(2);
+  document.getElementById("hawtGasoline").innerText = (kWh / gasolineKWh).toFixed(2);
+  document.getElementById("hawtCoal").innerText = (kWh / coalKWh).toFixed(2);
+  document.getElementById("hawtGas").innerText = (kWh / gasKWh).toFixed(2);
+  document.getElementById("hawtCO2").innerText = (kWh * co2PerKWh).toFixed(2);
+}
+function updateVAWTEnvironmentalImpact() {
+  const days = parseInt(document.getElementById("vawtTimeSlider").value || 0);
+  const powerW = parseFloat(document.getElementById("vawtPowerOutput").innerText) || 0;
+  const kWh = (powerW * 24 * days) / 1000;
+
+  document.getElementById("vawtTotalEnergy").innerText = kWh.toFixed(2);
+
+  const barrelKWh = 1700;
+  const gasolineKWh = 33.7;
+  const coalKWh = 2.5;
+  const gasKWh = 10.5;
+  const co2PerKWh = 0.5;
+
+  document.getElementById("vawtOil").innerText = (kWh / barrelKWh).toFixed(2);
+  document.getElementById("vawtGasoline").innerText = (kWh / gasolineKWh).toFixed(2);
+  document.getElementById("vawtCoal").innerText = (kWh / coalKWh).toFixed(2);
+  document.getElementById("vawtGas").innerText = (kWh / gasKWh).toFixed(2);
+  document.getElementById("vawtCO2").innerText = (kWh * co2PerKWh).toFixed(2);
+}
+
+
+function resetFinancial(type) {
+  document.getElementById(`${type}CountrySearch`).value = "";
+  document.getElementById(`${type}CountrySearch`).dataset.price = 0;
+  document.getElementById(`${type}SelectedCountry`).textContent = "None";
+  document.getElementById(`${type}PricePerKwh`).textContent = "0.00";
+  document.getElementById(`${type}Revenue`).textContent = "0.00";
+}
+
+// Track if HAWT is in wind farm mode
+let hawtInWindFarm = false;
+
+// Show/hide wind farm grid setup options
+function setWindFarmMode(enabled) {
+  hawtInWindFarm = enabled;
+  const settings = document.getElementById("hawtFarmSettings");
+  const gridContainer = document.getElementById("hawtFarmGridContainer");
+  const summary = document.getElementById("hawtFarmOutputSummary");
+  const charts = document.getElementById("hawtFarmCharts");
+
+  if (enabled) {
+    settings.classList.remove("hidden");
+  } else {
+    settings.classList.add("hidden");
+    gridContainer.classList.add("hidden");
+    summary.classList.add("hidden");
+    charts.classList.add("hidden");
+    document.getElementById("hawtFarmGrid").innerHTML = "";
+    hawtFarmGrid = [];
+    document.getElementById("hawtTurbineCount").textContent = "0";
+  }
+}
+let hawtFarmGrid = [];
+
+function generateHAWTGrid() {
+  const rows = parseInt(document.getElementById("hawtRows").value);
+  const cols = parseInt(document.getElementById("hawtCols").value);
+  const gridContainer = document.getElementById("hawtFarmGrid");
+  const displayContainer = document.getElementById("hawtFarmGridContainer");
+  const countDisplay = document.getElementById("hawtTurbineCount");
+
+  if (!rows || !cols || rows < 1 || cols < 1) {
+    alert("Please enter valid grid dimensions.");
+    return;
+  }
+
+  hawtFarmGrid = [];
+  gridContainer.innerHTML = "";
+  gridContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
+
+  const centerRow = Math.floor(rows / 2);
+  const centerCol = Math.floor(cols / 2);
+
+  let activeCount = 0;
+
+  for (let r = 0; r < rows; r++) {
+    const row = [];
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement("div");
+      cell.style.width = "30px";
+      cell.style.height = "30px";
+      cell.style.border = "1px solid #ccc";
+      cell.style.textAlign = "center";
+      cell.style.cursor = "pointer";
+      cell.style.fontSize = "18px";
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+
+      const isCenter = (r === centerRow) && (c === centerCol);
+
+      if (isCenter) {
+        cell.textContent = "🌀";
+        cell.style.backgroundColor = "#e0f7fa";
+        row.push(1);
+        activeCount++;
+      } else {
+        cell.addEventListener("click", () => {
+          const current = row[c];
+          const active = current === 1;
+          row[c] = active ? 0 : 1;
+          cell.textContent = active ? "" : "🌀";
+          cell.style.backgroundColor = active ? "" : "#e8f5e9";
+          updateHAWTTurbineCount();
+        });
+        row.push(0);
+      }
+
+      gridContainer.appendChild(cell);
+    }
+    hawtFarmGrid.push(row);
+  }
+
+  countDisplay.textContent = activeCount;
+  displayContainer.classList.remove("hidden");
+}
+
+function updateHAWTTurbineCount() {
+  let count = 0;
+  for (let r = 0; r < hawtFarmGrid.length; r++) {
+    for (let c = 0; c < hawtFarmGrid[r].length; c++) {
+      if (hawtFarmGrid[r][c] === 1) count++;
+    }
+  }
+  document.getElementById("hawtTurbineCount").textContent = count;
+}
+
+// === VAWT Wind Farm State ===
+let vawtInWindFarm = false;
+let vawtFarmGrid = [];
+
+// Toggle VAWT wind farm settings
+function setVAWTWindFarmMode(enabled) {
+  vawtInWindFarm = enabled;
+  const settings = document.getElementById("vawtFarmSettings");
+  const gridContainer = document.getElementById("vawtFarmGridContainer");
+  const summary = document.getElementById("vawtFarmOutputSummary");
+  const charts = document.getElementById("vawtFarmCharts");
+
+  if (enabled) {
+    settings.classList.remove("hidden");
+  } else {
+    settings.classList.add("hidden");
+    gridContainer.classList.add("hidden");
+    summary.classList.add("hidden");
+    charts.classList.add("hidden");
+    document.getElementById("vawtFarmGrid").innerHTML = "";
+    vawtFarmGrid = [];
+    document.getElementById("vawtTurbineCount").textContent = "0";
+  }
+}
+
+// Generate VAWT Grid
+function generateVAWTGrid() {
+  const rows = parseInt(document.getElementById("vawtRows").value);
+  const cols = parseInt(document.getElementById("vawtCols").value);
+  const gridContainer = document.getElementById("vawtFarmGrid");
+  const displayContainer = document.getElementById("vawtFarmGridContainer");
+  const countDisplay = document.getElementById("vawtTurbineCount");
+
+  if (!rows || !cols || rows < 1 || cols < 1) {
+    alert("Please enter valid grid dimensions.");
+    return;
+  }
+
+  vawtFarmGrid = [];
+  gridContainer.innerHTML = "";
+  gridContainer.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
+
+  const centerRow = Math.floor(rows / 2);
+  const centerCol = Math.floor(cols / 2);
+
+  let activeCount = 0;
+
+  for (let r = 0; r < rows; r++) {
+    const row = [];
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement("div");
+      cell.style.width = "30px";
+      cell.style.height = "30px";
+      cell.style.border = "1px solid #ccc";
+      cell.style.textAlign = "center";
+      cell.style.cursor = "pointer";
+      cell.style.fontSize = "18px";
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+
+      const isCenter = (r === centerRow) && (c === centerCol);
+
+      if (isCenter) {
+        cell.textContent = "🌀";
+        cell.style.backgroundColor = "#e0f7fa";
+        row.push(1);
+        activeCount++;
+      } else {
+        cell.addEventListener("click", () => {
+          const current = row[c];
+          const active = current === 1;
+          row[c] = active ? 0 : 1;
+          cell.textContent = active ? "" : "🌀";
+          cell.style.backgroundColor = active ? "" : "#e8f5e9";
+          updateVAWTTurbineCount();
+        });
+        row.push(0);
+      }
+
+      gridContainer.appendChild(cell);
+    }
+    vawtFarmGrid.push(row);
+  }
+
+  countDisplay.textContent = activeCount;
+  displayContainer.classList.remove("hidden");
+}
+
+// Update active VAWT turbine count
+function updateVAWTTurbineCount() {
+  let count = 0;
+  for (let r = 0; r < vawtFarmGrid.length; r++) {
+    for (let c = 0; c < vawtFarmGrid[r].length; c++) {
+      if (vawtFarmGrid[r][c] === 1) count++;
+    }
+  }
+  document.getElementById("vawtTurbineCount").textContent = count;
+}
+
+function calculateVAWTWindFarmOutput() {
+  let totalTurbines = 0;
+  let idealOutput = 0;
+  let actualOutput = 0;
+
+  const rows = vawtFarmGrid.length;
+  const cols = vawtFarmGrid[0].length;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (vawtFarmGrid[r][c] !== 1) continue;
+
+      totalTurbines++;
+
+      const basePower = calculateVAWTPowerAtSpeed(parseFloat(document.getElementById('vawtWindSpeed').value || 0));
+      idealOutput += basePower;
+
+      // Wake loss: reduce output if turbines upwind (from North to South)
+      let wakeLossFactor = 1;
+      for (let check = 0; check < r; check++) {
+        if (vawtFarmGrid[check][c] === 1) {
+          wakeLossFactor -= 0.15;
+        }
+      }
+
+      wakeLossFactor = Math.max(0.5, wakeLossFactor); // minimum 50%
+      const cellIndex = r * cols + c;
+      const gridCell = document.getElementById("vawtFarmGrid").children[cellIndex];
+      const thisLossPercent = 1 - wakeLossFactor;
+
+      if (thisLossPercent >= 0.3) {
+        gridCell.style.backgroundColor = "#ffdddd"; // high loss
+        gridCell.title = "High wake loss";
+      } else {
+        gridCell.style.backgroundColor = "#e8f5e9"; // normal
+        gridCell.title = "";
+      }
+
+      actualOutput += basePower * wakeLossFactor;
+    }
+  }
+
+  const loss = idealOutput - actualOutput;
+  const lossPercent = (loss / idealOutput) * 100;
+
+  // Update HTML
+  document.getElementById("vawtFarmTotalTurbines").textContent = totalTurbines;
+  document.getElementById("vawtFarmIdeal").textContent = idealOutput.toFixed(2);
+  document.getElementById("vawtFarmActual").textContent = actualOutput.toFixed(2);
+  document.getElementById("vawtFarmLoss").textContent = loss.toFixed(2);
+  document.getElementById("vawtFarmLossPercent").textContent = lossPercent.toFixed(1);
+
+  document.getElementById("vawtFarmOutputSummary").classList.remove("hidden");
+  renderVAWTFarmCharts(idealOutput, actualOutput);
+}
+
+function calculateHAWTWindFarmOutput() {
+  const windDir = selectedWindAngle; // from your compass
+  const isNorth = windDir >= 315 || windDir <= 45;
+
+  let totalTurbines = 0;
+  let idealOutput = 0;
+  let actualOutput = 0;
+
+  const rows = hawtFarmGrid.length;
+  const cols = hawtFarmGrid[0].length;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (hawtFarmGrid[r][c] !== 1) continue;
+
+      totalTurbines++;
+
+      // Get power for 1 turbine
+      const basePower = calculateHAWTPowerAtSpeed(parseFloat(document.getElementById('windSpeed').value || 0));
+      idealOutput += basePower;
+
+      // Wake loss: check for turbines upwind
+      let wakeLossFactor = 1;
+
+      if (isNorth) {
+        for (let check = 0; check < r; check++) {
+          if (hawtFarmGrid[check][c] === 1) {
+            wakeLossFactor -= 0.15;
+          }
+        }
+      }
+
+      
+
+      wakeLossFactor = Math.max(0.5, wakeLossFactor); // minimum 50% efficiency
+      const cellIndex = r * cols + c;
+      const gridCell = document.getElementById("hawtFarmGrid").children[cellIndex];
+      const thisLossPercent = 1 - wakeLossFactor;
+
+      if (thisLossPercent >= 0.3) {
+        gridCell.style.backgroundColor = "#ffdddd"; // light red
+        gridCell.title = "High wake loss";
+      } else {
+        gridCell.style.backgroundColor = "#e8f5e9"; // normal active
+        gridCell.title = "";
+      }
+      actualOutput += basePower * wakeLossFactor;
+    }
+  }
+
+  const loss = idealOutput - actualOutput;
+  const lossPercent = (loss / idealOutput) * 100;
+
+  // Update output fields
+  document.getElementById("hawtFarmTotalTurbines").textContent = totalTurbines;
+  document.getElementById("hawtFarmIdeal").textContent = idealOutput.toFixed(2);
+  document.getElementById("hawtFarmActual").textContent = actualOutput.toFixed(2);
+  document.getElementById("hawtFarmLoss").textContent = loss.toFixed(2);
+  document.getElementById("hawtFarmLossPercent").textContent = lossPercent.toFixed(1);
+
+  document.getElementById("hawtFarmOutputSummary").classList.remove("hidden");
+  renderHAWTFarmCharts(idealOutput, actualOutput);
+}
+
+let hawtBarChartInstance;
+let hawtPieChartInstance;
+
+function renderHAWTFarmCharts(ideal, actual) {
+  const barCtx = document.getElementById("hawtFarmBarChart");
+  const pieCtx = document.getElementById("hawtFarmPieChart");
+
+  // Destroy previous charts
+  if (hawtBarChartInstance) hawtBarChartInstance.destroy();
+  if (hawtPieChartInstance) hawtPieChartInstance.destroy();
+
+  // Bar chart: Ideal vs Actual
+  hawtBarChartInstance = new Chart(barCtx, {
+    type: "bar",
+    data: {
+      labels: ["Ideal Output", "Actual Output", "Wake Loss"],
+      datasets: [{
+        label: "Power (W)",
+        data: [ideal, actual, ideal - actual],
+        backgroundColor: ["#4CAF50", "#2196F3", "#F44336"]
+      }]
+    },
+    options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    y: { beginAtZero: true }
+  }
+}
+  });
+
+  let vawtBarChartInstance;
+let vawtPieChartInstance;
+
+function renderVAWTFarmCharts(ideal, actual) {
+  const barCtx = document.getElementById("vawtFarmBarChart");
+  const pieCtx = document.getElementById("vawtFarmPieChart");
+
+  // Destroy old charts if they exist
+  if (vawtBarChartInstance) vawtBarChartInstance.destroy();
+  if (vawtPieChartInstance) vawtPieChartInstance.destroy();
+
+  // Bar chart
+  vawtBarChartInstance = new Chart(barCtx, {
+    type: "bar",
+    data: {
+      labels: ["Ideal Output", "Actual Output", "Wake Loss"],
+      datasets: [{
+        label: "Power (W)",
+        data: [ideal, actual, ideal - actual],
+        backgroundColor: ["#4CAF50", "#2196F3", "#F44336"]
+      }]
+    },
+    options: {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    y: { beginAtZero: true }
+  }
+}
+  });
+
+  // Pie chart
+  vawtPieChartInstance = new Chart(pieCtx, {
+    type: "pie",
+    data: {
+      labels: ["Actual Output", "Wake Loss"],
+      datasets: [{
+        data: [actual, ideal - actual],
+        backgroundColor: ["#2196F3", "#F44336"]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+
+  document.getElementById("vawtFarmCharts").classList.remove("hidden");
+}
+
+  // Pie chart
+  hawtPieChartInstance = new Chart(pieCtx, {
+    type: "pie",
+    data: {
+      labels: ["Actual Output", "Wake Loss"],
+      datasets: [{
+        data: [actual, ideal - actual],
+        backgroundColor: ["#2196F3", "#F44336"]
+      }]
+    }
+  });
+
+  document.getElementById("hawtFarmCharts").classList.remove("hidden");
+}
+
+function showHAWTTab(tab) {
+  document.getElementById("hawtGraphContainer").classList.toggle("hidden", tab !== "output");
+  document.getElementById("hawtFinancialTab").classList.toggle("hidden", tab !== "financial");
+  document.getElementById("hawtEnvironmentalImpactTab").classList.toggle("hidden", tab !== "impact");
+  document.getElementById("hawtModelTableContainer").classList.toggle("hidden", tab !== "financial");
+
+  if (tab === "impact") {
+    updateHAWTEnvironmentalImpact();
+  }
+  if (tab === "financial") {
+    populateTurbineModelTable(); // ✅ Add this
+  }
+}
+
+function showVAWTTab(tab) {
+  document.getElementById("vawtGraphContainer").classList.toggle("hidden", tab !== "output");
+  document.getElementById("vawtFinancialTab").classList.toggle("hidden", tab !== "financial");
+  document.getElementById("vawtEnvironmentalImpactTab").classList.toggle("hidden", tab !== "impact");
+
+  if (tab === "impact") {
+    updateVAWTEnvironmentalImpact();
+  }
+}
+
+// Reset financials on any input change
+function attachResetListeners() {
+  const hawtInputs = document.querySelectorAll("#calculatorForm input, #calculatorForm select");
+  hawtInputs.forEach(input => input.addEventListener("input", () => resetFinancial("hawt")));
+
+  const vawtInputs = document.querySelectorAll("#vawtCalculatorForm input, #vawtCalculatorForm select");
+  vawtInputs.forEach(input => input.addEventListener("input", () => resetFinancial("vawt")));
+}
+
+// Populate table with top 50 wind turbine models
+function populateTurbineModelTable() {
+  const tableBody = document.getElementById("hawtModelTableBody");
+  const models = [
+["1", "Vestas V164", "Vestas", "HAWT", "9.5", "$12–15M", "$150k–$200k"],
+["2", "GE Haliade-X", "General Electric", "HAWT", "14.0", "$15–20M", "$180k–$250k"],
+["3", "SG 14-222 DD", "Siemens Gamesa", "HAWT", "14.0", "$16–22M", "$190k–$260k"],
+["4", "MySE 16.0-242", "MingYang", "HAWT", "16.0", "$18–24M", "$200k–$280k"],
+["5", "Vestas V150", "Vestas", "HAWT", "4.2", "$4.5–6M", "$90k–$120k"],
+["6", "Enercon E-126", "Enercon", "HAWT", "7.5", "$10–14M", "$130k–$180k"],
+["7", "Goldwind GW155", "Goldwind", "HAWT", "6.0", "$7–9M", "$110k–$150k"],
+["8", "SG 5.0-145", "Siemens Gamesa", "HAWT", "5.0", "$5.5–7.5M", "$100k–$140k"],
+["9", "GE 5.3-158", "General Electric", "HAWT", "5.3", "$6–8M", "$105k–$145k"],
+["10", "Nordex N149", "Nordex", "HAWT", "4.5", "$5–7M", "$95k–$130k"],
+["11", "Envision EN-171", "Envision", "HAWT", "7.5", "$9–12M", "$120k–$170k"],
+  ["12", "MySE 8.3-180", "MingYang", "HAWT", "8.3", "$10–13M", "$125k–$175k"],
+["13", "Senvion 6.2M152", "Senvion", "HAWT", "6.2", "$7.5–10M", "$115k–$160k"],
+["14", "Vestas V136", "Vestas", "HAWT", "4.2", "$4–5.5M", "$85k–$115k"],
+["15", "SG 11.0-200 DD", "Siemens Gamesa", "HAWT", "11.0", "$13–17M", "$160k–$220k"],
+["16", "GE Cypress 6.0-164", "General Electric", "HAWT", "6.0", "$7–9.5M", "$110k–$155k"],
+["17", "Enercon E-160 EP5", "Enercon", "HAWT", "5.5", "$6.5–8.5M", "$105k–$150k"],
+["18", "Suzlon S144", "Suzlon", "HAWT", "3.0", "$3–4.5M", "$70k–$100k"],
+["19", "Dongfang DF175", "Dongfang", "HAWT", "10.0", "$12–16M", "$150k–$210k"],
+["20", "Vestas V117", "Vestas", "HAWT", "3.6", "$3.5–5M", "$75k–$110k"],
+["21", "H210-10MW", "CSIC Haizhuang", "HAWT", "10.0", "$12.5–16.5M", "$155k–$215k"],
+["22", "Nordex N163", "Nordex", "HAWT", "5.7", "$6.5–8.5M", "$105k–$150k"],
+["23", "SG 4.5-145", "Siemens Gamesa", "HAWT", "4.5", "$5–7M", "$95k–$130k"],
+["24", "Goldwind GW175", "Goldwind", "HAWT", "7.5", "$9–12M", "$120k–$170k"],
+["25", "UGE VisionAIR5", "UGE", "VAWT", "0.003", "$32k–$40k", "$1k–$2k"],
+["26", "GE 2.8-127", "General Electric", "HAWT", "2.8", "$2.8–3.8M", "$60k–$85k"],
+["27", "Vestas V90", "Vestas", "HAWT", "2.0", "$2–3M", "$50k–$70k"],
+["28", "Envision EN-148", "Envision", "HAWT", "4.5", "$5–7M", "$95k–$130k"],
+["29", "Sway ST10", "Sway", "HAWT", "10.0", "$12–16M", "$150k–$210k"],
+["30", "Enercon E-115", "Enercon", "HAWT", "3.0", "$3.2–4.5M", "$70k–$100k"],
+["31", "WindEnergy7", "WindEnergy7", "HAWT", "0.001", "$7k–$12k", "$500–$1k"],
+["32", "Eolink Floating", "Eolink", "HAWT", "12.0", "$14–18M", "$170k–$230k"],
+["33", "Bergey Excel 10", "Bergey", "HAWT", "0.01", "$50k–$70k", "$1.5k–$3k"],
+["34", "SG 8.0-167 DD", "Siemens Gamesa", "HAWT", "8.0", "$9.5–13M", "$125k–$175k"],
+["35", "Windside WS-4", "Windside", "VAWT", "0.001", "$20k–$30k", "$800–$1.8k"],
+["36", "MySE 11-203", "MingYang", "HAWT", "11.0", "$13–17M", "$160k–$220k"],
+["37", "Vestas V112", "Vestas", "HAWT", "3.0", "$3–4.2M", "$65k–$95k"],
+["38", "GE 3.4-137", "General Electric", "HAWT", "3.4", "$3.8–5.2M", "$80k–$110k"],
+["39", "Hi-VAWT DS3000", "Hi-VAWT", "VAWT", "0.003", "$25k–$35k", "$900–$1.9k"],
+["40", "Gamesa G132", "Gamesa", "HAWT", "3.3", "$3.7–5M", "$75k–$110k"],
+["41", "XANT M-21", "XANT", "HAWT", "0.1", "$200k–$300k", "$5k–$10k"],
+["42", "Nordex N131", "Nordex", "HAWT", "3.6", "$3.8–5.2M", "$80k–$110k"],
+["43", "Enercon E-138 EP3", "Enercon", "HAWT", "3.5", "$3.9–5.3M", "$80k–$115k"],
+["44", "Aeolos V 10kW", "Aeolos", "VAWT", "0.01", "$48k–$65k", "$1.5k–$3k"],
+["45", "Goldwind GW140", "Goldwind", "HAWT", "3.4", "$3.8–5.2M", "$80k–$110k"],
+["46", "NPS 100", "Northern Power", "HAWT", "0.1", "$250k–$350k", "$6k–$12k"],
+["47", "G132", "Siemens Gamesa", "HAWT", "3.4", "$3.8–5.2M", "$80k–$110k"],
+["48", "QAH-20kW", "Qingdao Anhua", "VAWT", "0.02", "$70k–$95k", "$2k–$4.5k"],
+["49", "Vestas V120", "Vestas", "HAWT", "2.2", "$2.5–3.5M", "$55k–$80k"],
+["50", "Hitachi HTW 2.0-80", "Hitachi", "HAWT", "2.0", "$2–2.8M", "$45k–$70k"]
+  ];
+
+  for (const row of models) {
+    const tr = document.createElement("tr");
+    row.forEach(cell => {
+      const td = document.createElement("td");
+      td.textContent = cell;
+      td.style.border = "1px solid #ccc";
+      td.style.padding = "8px";
+      tr.appendChild(td);
+    });
+    tableBody.appendChild(tr);
+  }
+}
+
+
+window.onload = function () {
+  setupWindCompass();
+  setupFinancialTabs();
+  attachResetListeners();
+  setupWeatherMap(); // <-- Call the map setup
+};
+
+// Load Leaflet map and fetch weather data using Open-Meteo
+let map;
+
+function setupWeatherMap() {
+  // HAWT Map
+  if (document.getElementById('map')) {
+    map = L.map('map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    map.on('click', async function (e) {
+      const lat = e.latlng.lat.toFixed(4);
+      const lon = e.latlng.lng.toFixed(4);
+      L.marker([lat, lon]).addTo(map).bindPopup("Fetching data...").openPopup();
+
+      const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`);
+      const data = await response.json();
+      const weather = data.current;
+
+      if (!weather) {
+        alert("Weather data not available for this location.");
+        return;
+      }
+
+      const { wind_speed_10m, temperature_2m, relative_humidity_2m } = weather;
+
+      document.getElementById('windSpeed').value = wind_speed_10m;
+      document.getElementById('airTemperature').value = temperature_2m;
+      document.getElementById('humidity').value = relative_humidity_2m;
+
+      map.eachLayer(layer => {
+        if (layer instanceof L.Marker) layer.bindPopup(`🌬️ Wind: ${wind_speed_10m} m/s<br>🌡️ Temp: ${temperature_2m} °C<br>💧 Humidity: ${relative_humidity_2m}%`);
+      });
+    });
+  }
+
+  // VAWT Map
+  if (document.getElementById('vawtMap')) {
+    vawtMap = L.map('vawtMap').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(vawtMap);
+
+    vawtMap.on('click', async function (e) {
+      const lat = e.latlng.lat.toFixed(4);
+      const lon = e.latlng.lng.toFixed(4);
+      L.marker([lat, lon]).addTo(vawtMap).bindPopup("Fetching data...").openPopup();
+
+      const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`);
+      const data = await response.json();
+      const weather = data.current;
+
+      if (!weather) {
+        alert("Weather data not available for this location.");
+        return;
+      }
+
+      const { wind_speed_10m, temperature_2m, relative_humidity_2m } = weather;
+
+      document.getElementById('vawtWindSpeed').value = wind_speed_10m;
+      document.getElementById('vawtAirTemperature').value = temperature_2m;
+      document.getElementById('vawtHumidity').value = relative_humidity_2m;
+
+      vawtMap.eachLayer(layer => {
+        if (layer instanceof L.Marker) layer.bindPopup(`🌬️ Wind: ${wind_speed_10m} m/s<br>🌡️ Temp: ${temperature_2m} °C<br>💧 Humidity: ${relative_humidity_2m}%`);
+      });
+    });
+  }
+}
+
+    </script>
+  </body>
+  </html>
