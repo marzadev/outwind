@@ -729,6 +729,28 @@ html, body {
     <li>🔥 Equivalent to <strong><span id="hawtGas">0</span></strong> cubic meters of natural gas</li>
     <li>🌍 CO₂ emissions avoided: <strong><span id="hawtCO2">0</span></strong> kg</li>
   </ul>
+
+<!-- HAWT Additional Environmental Features -->
+<div id="hawtExtraEnvironmental" style="margin-top: 30px;">
+  <!-- Greenhouse Gas Savings Graph -->
+  <h4>Greenhouse Gas Savings Over Time</h4>
+  <canvas id="hawtCO2Graph" style="max-width: 600px;"></canvas>
+
+  <!-- Noise Pollution Radius -->
+  <h4 style="margin-top: 30px;">Noise Pollution Radius</h4>
+  <p>Typical wind turbines generate <strong>90–105 dB</strong> near the hub. At <strong>300 meters</strong>, this drops to around <strong>45 dB</strong>, similar to a quiet conversation.</p>
+  <ul>
+    <li><strong>0–100m:</strong> 90–100 dB (Very Loud)</li>
+    <li><strong>100–300m:</strong> 70–85 dB (Loud)</li>
+    <li><strong>300–500m:</strong> 45–60 dB (Moderate)</li>
+    <li><strong>500m+:</strong> Below 40 dB (Quiet)</li>
+  </ul>
+
+  <!-- Land Footprint Estimator -->
+  <h4 style="margin-top: 30px;">Land Footprint Estimator</h4>
+  <p>Estimated Land Required per Turbine: <strong><span id="hawtLandFootprint">0</span> m²</strong></p>
+</div>
+
 </div>
 
 
@@ -738,7 +760,133 @@ html, body {
     <input type="range" id="hawtWindSpeedSlider" min="3" max="25" value="10">
     <canvas id="hawtPowerGraph"></canvas>
   </div> 
+  
+<!-- FAQ Section -->
+<div class="output" id="faqSection" style="margin-top: 40px; border: 1px solid #ccc; border-radius: 8px; padding: 20px; background-color: #f9f9ff;">
+<details>
+  <summary style="font-weight: bold; font-size: 1.2em; cursor: pointer;">FAQs</summary>
+  <div style="margin-top: 15px;">
+
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What is the purpose of this calculator?</summary>
+      <p style="margin-top: 8px;">This calculator helps estimate the power output, financial returns, and environmental impact of horizontal (HAWT) and vertical (VAWT) wind turbines based on user-defined conditions.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What is the Betz Limit?</summary>
+      <p style="margin-top: 8px;">The Betz Limit (59.3%) is the maximum theoretical efficiency a wind turbine can achieve when extracting energy from wind.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What’s the difference between HAWT and VAWT?</summary>
+      <p style="margin-top: 8px;">HAWTs rotate around a horizontal axis and are ideal for open areas with steady wind. VAWTs rotate around a vertical axis and perform better in turbulent or urban environments.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What is air density and why does it matter?</summary>
+      <p style="margin-top: 8px;">Air density affects how much energy is in the wind. Higher air density = more potential power. It depends on temperature, pressure, and humidity.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">How do I calculate air density?</summary>
+      <p style="margin-top: 8px;">Use the formula:<br>ρ = p / (R × T)<br>where p = pressure (Pa), R = 287 J/kg·K, T = temperature (K).</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What is wind farm wake loss?</summary>
+      <p style="margin-top: 8px;">Wake loss occurs when turbines interfere with each other’s airflow, reducing the total efficiency of the farm.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What does “Unavailability” mean?</summary>
+      <p style="margin-top: 8px;">It refers to the percentage of time a turbine is non-operational due to maintenance, failures, or other downtimes.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Why does the power output change when wind direction changes?</summary>
+      <p style="margin-top: 8px;">HAWTs are directional—misalignment between wind and blade direction reduces efficiency. VAWTs are omnidirectional and less sensitive to wind angle.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">How do energy storage methods affect output?</summary>
+      <p style="margin-top: 8px;">Storage methods have different efficiencies. The selected method directly impacts how much of the generated power is retained.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Can I use this tool for real project planning?</summary>
+      <p style="margin-top: 8px;">While the calculator provides solid estimates, real-world projects should involve professional engineering analysis and site-specific data.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What financial data is used?</summary>
+      <p style="margin-top: 8px;">We use 2025 average electricity prices per kWh by country to estimate potential revenue based on power output and time duration.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">How much energy can one wind turbine power?</summary>
+      <p style="margin-top: 8px;">A large commercial turbine (e.g., 2–3 MW) can power around 1,000 homes per year depending on wind conditions.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Can I use this calculator for Mars or other planets?</summary>
+      <p style="margin-top: 8px;">Yes, with custom inputs! Just modify the air density and wind speed values to match Martian conditions (e.g., low air density ~0.02 kg/m³).</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Why do turbine blades have that curved shape?</summary>
+      <p style="margin-top: 8px;">They're shaped like airplane wings (airfoils) to generate lift, which causes the blades to spin with high efficiency.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Why are wind turbines usually white?</summary>
+      <p style="margin-top: 8px;">White minimizes visual impact and reflects sunlight, reducing heat buildup in the blades and preventing material fatigue.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Why do turbines have 3 blades, not 4 or 5?</summary>
+      <p style="margin-top: 8px;">Three blades offer the best balance of efficiency, cost, and structural stability. More blades add weight and reduce speed.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">How do I know if a site is good for a wind turbine?</summary>
+      <p style="margin-top: 8px;">A good site has consistent winds over 5 m/s, low turbulence, and minimal obstacles. Use wind resource maps or real-time data.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Is wind energy really carbon-free?</summary>
+      <p style="margin-top: 8px;">Turbines have some carbon footprint during manufacturing, but their operational emissions are nearly zero, making them one of the cleanest energy sources.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Can wind turbines work at night?</summary>
+      <p style="margin-top: 8px;">Yes! Wind turbines operate 24/7 as long as there's wind — they don’t rely on sunlight like solar panels.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Why are wind farms often located on hills or open plains?</summary>
+      <p style="margin-top: 8px;">Higher elevations and unobstructed areas allow faster and steadier winds, which greatly improve turbine performance.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">How loud is a wind turbine?</summary>
+      <p style="margin-top: 8px;">From 300 meters away, a turbine is about as loud as a refrigerator (35–45 dB). Up close, it can be around 90 dB.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Can wind turbines overheat?</summary>
+      <p style="margin-top: 8px;">Yes, especially in hot environments with poor airflow. That’s why many turbines include cooling systems in the nacelle.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What’s inside the nacelle of a wind turbine?</summary>
+      <p style="margin-top: 8px;">It houses the gearbox, generator, brake system, cooling units, and control electronics — essentially the brain and muscles.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">What is the carbon payback time for a wind turbine?</summary>
+      <p style="margin-top: 8px;">On average, it takes 6 months to 1 year for a turbine to offset all the carbon used to manufacture and install it.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Why do turbines sometimes spin without wind?</summary>
+      <p style="margin-top: 8px;">They may be in maintenance or testing mode. Sometimes motors rotate the blades slowly to prevent mechanical stress.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Do all countries use the same turbine models?</summary>
+      <p style="margin-top: 8px;">No. Models vary based on climate, regulation, grid standards, and manufacturer availability (e.g., offshore vs inland, icy climates, etc.).</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Can small wind turbines power a home?</summary>
+      <p style="margin-top: 8px;">Yes, small turbines (2–10 kW) can meet the needs of a single home, especially in off-grid or windy rural locations.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">Why do wind turbines shut off in low wind?</summary>
+      <p style="margin-top: 8px;">If wind speed drops below the cut-in speed (usually ~3 m/s), the turbine stops to prevent inefficient operation and wear.</p>
+    </details>
+    <details style="margin-top: 10px;">
+      <summary style="cursor: pointer; font-weight: 600;">How does blade length affect power?</summary>
+      <p style="margin-top: 8px;">Longer blades sweep a larger area, capturing more wind and increasing power output — power increases with the square of blade length.</p>
+    </details>
   </div>
+</details>
+</div>
+</div>
 
     <!-- VAWT Form (Insert below HAWT Form) -->
     <div id="vawtForm" class="hidden">
@@ -1028,6 +1176,27 @@ html, body {
     <li>🔥 Equivalent to <strong><span id="vawtGas">0</span></strong> cubic meters of natural gas</li>
     <li>🌍 CO₂ emissions avoided: <strong><span id="vawtCO2">0</span></strong> kg</li>
   </ul>
+
+<!-- VAWT Additional Environmental Features -->
+<div id="vawtExtraEnvironmental" style="margin-top: 30px;">
+  <!-- Greenhouse Gas Savings Graph -->
+  <h4>Greenhouse Gas Savings Over Time</h4>
+  <canvas id="vawtCO2Graph" style="max-width: 600px;"></canvas>
+
+  <!-- Noise Pollution Radius -->
+  <h4 style="margin-top: 30px;">Noise Pollution Radius</h4>
+  <p>VAWTs are generally quieter than HAWTs, averaging <strong>60–80 dB</strong> at close range. At <strong>100 meters</strong>, levels drop to <strong>35–50 dB</strong>.</p>
+  <ul>
+    <li><strong>0–50m:</strong> 60–80 dB (Moderate to Loud)</li>
+    <li><strong>50–150m:</strong> 45–60 dB (Moderate)</li>
+    <li><strong>150m+:</strong> Below 40 dB (Quiet)</li>
+  </ul>
+
+  <!-- Land Footprint Estimator -->
+  <h4 style="margin-top: 30px;">Land Footprint Estimator</h4>
+  <p>Estimated Land Required per Turbine: <strong><span id="vawtLandFootprint">0</span> m²</strong></p>
+</div>
+
 </div>
 <!-- VAWT Financial Tab -->
 <div id="vawtFinancialTab" class="output hidden">
@@ -1052,7 +1221,10 @@ html, body {
             <canvas id="vawtPowerGraph"></canvas>
           </div>
       </div>
-    </div>
+    
+<!-- FAQ Section -->
+
+</div>
   
     <script>
 function selectTurbineType(type) {
@@ -1765,6 +1937,36 @@ function updateHAWTEnvironmentalImpact() {
   document.getElementById("hawtCoal").innerText = (kWh / coalKWh).toFixed(2);
   document.getElementById("hawtGas").innerText = (kWh / gasKWh).toFixed(2);
   document.getElementById("hawtCO2").innerText = (kWh * co2PerKWh).toFixed(2);
+
+  // Plot CO2 savings graph (HAWT)
+const co2 = parseFloat(document.getElementById("hawtCO2").innerText);
+const years = Array.from({length: 10}, (_, i) => 2025 + i);
+const savings = years.map((_, i) => (co2 * (i + 1)).toFixed(2));
+if (window.hawtCO2Chart) hawtCO2Chart.destroy();
+hawtCO2Chart = new Chart(document.getElementById("hawtCO2Graph"), {
+  type: 'line',
+  data: {
+    labels: years,
+    datasets: [{
+      label: 'Cumulative CO₂ Savings (kg)',
+      data: savings,
+      borderWidth: 2,
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: true },
+      tooltip: { mode: 'index', intersect: false }
+    }
+  }
+});
+
+// Land Footprint (HAWT)
+const bladeLength = parseFloat(document.getElementById("bladeLength").value);
+const hawtFootprint = Math.pow(bladeLength * 10, 2); // Simple estimate: 10x rotor spacing
+document.getElementById("hawtLandFootprint").innerText = hawtFootprint.toFixed(0);
 }
 function updateVAWTEnvironmentalImpact() {
   const days = parseInt(document.getElementById("vawtTimeSlider").value || 0);
@@ -1784,6 +1986,37 @@ function updateVAWTEnvironmentalImpact() {
   document.getElementById("vawtCoal").innerText = (kWh / coalKWh).toFixed(2);
   document.getElementById("vawtGas").innerText = (kWh / gasKWh).toFixed(2);
   document.getElementById("vawtCO2").innerText = (kWh * co2PerKWh).toFixed(2);
+
+// Plot CO2 savings graph (VAWT)
+const co2 = parseFloat(document.getElementById("vawtCO2").innerText);
+const years = Array.from({length: 10}, (_, i) => 2025 + i);
+const savings = years.map((_, i) => (co2 * (i + 1)).toFixed(2));
+if (window.vawtCO2Chart) vawtCO2Chart.destroy();
+vawtCO2Chart = new Chart(document.getElementById("vawtCO2Graph"), {
+  type: 'line',
+  data: {
+    labels: years,
+    datasets: [{
+      label: 'Cumulative CO₂ Savings (kg)',
+      data: savings,
+      borderWidth: 2,
+      fill: true
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: true },
+      tooltip: { mode: 'index', intersect: false }
+    }
+  }
+});
+
+// Land Footprint (VAWT)
+const diameter = parseFloat(document.getElementById("rotorDiameter").value);
+const vawtFootprint = Math.pow(diameter * 6, 2); // Closer spacing allowed for VAWT
+document.getElementById("vawtLandFootprint").innerText = vawtFootprint.toFixed(0);
+
 }
 
 
