@@ -212,6 +212,7 @@ hr.sep{border:0;border-top:1px solid var(--line);margin:28px 0}
 /* ---------- MAP ---------- */
 .map-wrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);margin-bottom:12px}
 #map{height:280px;background:#0b1122}
+#map .leaflet-tile-pane{filter:invert(.92) grayscale(.6) sepia(.5) hue-rotate(175deg) saturate(2.2) brightness(.78)}
 .map-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:20px}
 .status{font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:flex-start;line-height:1.45}
 .status .dot{width:8px;height:8px;border-radius:50%;background:var(--silver);margin-top:5px;flex:none}
@@ -1075,7 +1076,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;ov
         <ul>
           <li><a href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo.com</a> (CC BY 4.0), using Copernicus ERA5</li>
           <li><a href="https://www.bigdatacloud.com/" target="_blank" rel="noopener">Reverse geocoding by BigDataCloud</a></li>
-          <li><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> · <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a></li>
+          <li><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> map data &amp; tiles</li>
           <li><a href="https://en.wind-turbine-models.com/" target="_blank" rel="noopener">wind-turbine-models.com</a></li>
         </ul>
       </div>
@@ -2119,9 +2120,10 @@ function setStatus(kind, text) { const s = $("mapStatus"); s.className = "status
 function setupMap() {
   if (typeof L === "undefined") { setStatus("bad", "The map library could not load. You can still type values manually."); return; }
   map = L.map("map", { worldCopyJump: true, scrollWheelZoom: false }).setView([30, 0], 2);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: "abcd", maxZoom: 19,
+  // Standard OpenStreetMap tiles (no API key), darkened with a CSS filter to match the theme
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
   }).addTo(map);
   map.on("click", (e) => loadSite(e.latlng.lat, e.latlng.lng));
   map.on("focus", () => map.scrollWheelZoom.enable());
